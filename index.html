@@ -61,86 +61,146 @@
             margin: 0;
         }
 
+        /* Layout principal: info lateral | fisuras */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        /* Columna lateral izquierda para ciclos e invasiones */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
         /* Contenedor de 2 columnas para fisuras (Normales | Steel Path) */
         .fissures-container {
             display: grid;
-            grid-template-columns: 1fr 1fr; /* Dos columnas iguales */
-            gap: 25px;
-            margin-bottom: 30px;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        
+        /* Contenedor para Sortie y Archon Hunt */
+        .missions-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 15px;
+        }
+        
+        .mission-box {
+            background: #0f1219;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #1a1f3a;
+        }
+        
+        .mission-item {
+            transition: all 0.2s;
+            cursor: default;
+        }
+        
+        .mission-item:hover {
+            border-color: #667eea !important;
+            transform: translateX(2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
         }
 
-        /* Cada columna de fisuras */
+        /* Cada columna de fisuras - ULTRA COMPACTA */
         .fissure-column {
             background: #0f1219;
-            padding: 20px;
-            border-radius: 12px;
+            padding: 8px;
+            border-radius: 6px;
             border: 1px solid #1a1f3a;
         }
 
-        /* Encabezado de cada columna */
+        /* Encabezado de cada columna - ULTRA PEQUEÑO */
         .column-header {
-            font-size: 1.3rem;
+            font-size: 0.85rem;
             font-weight: 700;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #2a3150;
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #2a3150;
+            text-align: center;
         }
 
-        /* Grupo de fisuras por tier (Lith, Meso, Neo, etc) */
+        /* Grupo de fisuras por tier (Lith, Meso, Neo, etc) - ULTRA COMPACTO */
         .tier-group {
-            margin-bottom: 20px;
+            margin-bottom: 6px;
         }
 
-        /* Título de cada tier */
+        /* Título de cada tier - ULTRA PEQUEÑO */
         .tier-title {
-            font-size: 0.9rem;
+            font-size: 0.65rem;
             font-weight: 600;
             color: #8b95a5;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
+            margin-top: 8px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
-        /* Card individual para cada fisura */
+        .tier-title:first-child {
+            margin-top: 0;
+        }
+
+        /* Card individual para cada fisura - ULTRA COMPACTA */
         .card {
             background: #151933;
             border: 1px solid #2a3150;
-            border-radius: 8px;
-            padding: 12px;
-            transition: all 0.3s;
-            margin-bottom: 8px;
+            border-radius: 4px;
+            padding: 6px 8px;
+            transition: all 0.2s;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
         }
 
         /* Efecto hover en las cards */
         .card:hover {
             border-color: #667eea;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.15);
+            transform: translateX(2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+        }
+
+        /* Info principal (tipo de misión + nodo) */
+        .card-info {
+            flex: 1;
+            min-width: 0;
         }
 
         /* Título de la card (tipo de misión) */
         .card-title {
-            font-size: 1rem;
+            font-size: 0.75rem;
             font-weight: 600;
-            margin-bottom: 6px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            margin-bottom: 1px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        /* Subtítulo de la card (nodo/planeta) */
+        /* Subtítulo de la card (nodo/planeta + facción) */
         .card-subtitle {
             color: #8b95a5;
-            font-size: 0.8rem;
-            margin-bottom: 6px;
+            font-size: 0.65rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        /* Timer de cuenta regresiva */
+        /* Timer de cuenta regresiva - ULTRA COMPACTO */
         .timer {
-            font-size: 1.1rem;
+            font-size: 0.75rem;
             font-weight: 700;
-            margin: 6px 0;
-            font-variant-numeric: tabular-nums; /* Números alineados */
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+            min-width: 60px;
+            text-align: right;
         }
 
         /* Timer cuando está por expirar (menos de 10 min) */
@@ -155,13 +215,9 @@
             50% { opacity: 0.6; }
         }
 
-        /* Etiqueta de información (enemigo, facción, etc) */
+        /* Etiqueta de información (enemigo, facción, etc) - OCULTA EN COMPACTO */
         .info-tag {
-            background: #2a3150;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            color: #a5b4c7;
+            display: none;
         }
 
         /* Mensaje de carga */
@@ -183,14 +239,75 @@
             text-align: center;
         }
 
+        /* Estilos para sidebar (ciclos e invasiones) */
+        .sidebar-section {
+            background: #0f1219;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #1a1f3a;
+        }
+
+        .sidebar-header {
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #2a3150;
+            text-align: center;
+        }
+
+        .sidebar-item {
+            background: #151933;
+            border: 1px solid #2a3150;
+            border-radius: 4px;
+            padding: 6px 8px;
+            margin-bottom: 6px;
+            font-size: 0.7rem;
+            transition: all 0.2s;
+            cursor: default;
+        }
+        
+        .sidebar-item:hover {
+            border-color: #667eea;
+            transform: translateX(2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+        }
+
+        .sidebar-item .timer {
+            margin-top: 4px;
+            font-size: 0.7rem;
+            color: #8b95a5;
+            text-align: left;
+        }
+
+        .sidebar-item-title {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .sidebar-item-timer {
+            color: #8b95a5;
+            font-size: 0.65rem;
+        }
+
         /* Responsive: en móviles las columnas se apilan */
+        @media (max-width: 1024px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                order: 2;
+            }
+        }
+
         @media (max-width: 768px) {
             h1 {
                 font-size: 2rem;
             }
 
             .fissures-container {
-                grid-template-columns: 1fr; /* Una sola columna */
+                grid-template-columns: 1fr;
             }
         }
 
@@ -202,6 +319,68 @@
             border-top: 1px solid #1a1f3a;
             color: #8b95a5;
             font-size: 0.85rem;
+        }
+
+        /* Tooltips para modificadores */
+        .modifier-tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+            border-bottom: 1px dotted #C55F7E;
+        }
+
+        .modifier-tooltip .tooltip-content {
+            visibility: hidden;
+            opacity: 0;
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background: #0f1219;
+            color: #e0e6ed;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #2a3150;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            width: 250px;
+            z-index: 1000;
+            font-size: 0.65rem;
+            line-height: 1.4;
+            text-align: left;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .modifier-tooltip .tooltip-content::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: #2a3150;
+        }
+
+        .modifier-tooltip:hover .tooltip-content {
+            visibility: visible;
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Animación de entrada suave */
+        @keyframes tooltipFadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(10px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0) scale(1);
+            }
+        }
+
+        .modifier-tooltip:hover .tooltip-content {
+            animation: tooltipFadeIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
     </style>
 </head>
@@ -219,12 +398,30 @@
             <img src="./1.gif">
             <img src="./1.gif">
             <img src="./1.gif">
+            <img src="./1.gif">
+            <img src="./1.gif">
+            <img src="./1.gif">
+            <img src="./1.gif">
         </div>
         
-        <!-- Contenedor donde se cargarán las fisuras -->
-        <div id="content">
-            <div class="loading">⏳ Cargando datos...</div>
+        <!-- Layout principal: sidebar + fisuras -->
+        <div class="main-layout">
+            <!-- Sidebar izquierda: ciclos e invasiones -->
+            <div class="sidebar" id="sidebar">
+                <div class="loading">⏳ Cargando...</div>
+            </div>
+            
+            <!-- Contenedor de fisuras a la derecha -->
+            <div id="fissures-content">
+                <div class="loading">⏳ Cargando fisuras...</div>
+            </div>
         </div>
+        
+        <!-- Sección: Sortie y Archon Hunt -->
+        <div id="missions-content"></div>
+        
+        <!-- Sección inferior: Arquimedeas -->
+        <div id="archimidean-content"></div>
         
         <!-- Footer con timestamp de última actualización -->
         <footer>
@@ -236,12 +433,16 @@
     <script>
         /* ===== CONFIGURACIÓN ===== */
         
-        // URL de la API de Warframe
+        // URLs de la API de Warframe
         const WORLDSTATE_URL = 'https://oracle.browse.wf/worldState.json';
+        const INVASIONS_URL = 'https://oracle.browse.wf/invasions';
+        const WEEKLY_URL = 'https://oracle.browse.wf/weekly';
+        const SORTIE_DATA_URL = 'https://raw.githubusercontent.com/WFCD/warframe-worldstate-data/master/data/sortieData.json';
         
         // Variables globales
-        let gameData = {}; // Almacena los datos de fisuras
+        let gameData = {fissures: [], cycles: {}, invasions: [], archimideans: {temporal: null, deep: null}, sortie: null, archonHunt: null}; // Almacena todos los datos del juego
         let lastFissureIds = new Set(); // Para detectar nuevas fisuras
+        let SORTIE_DATA = {}; // Datos de modificadores y bosses de Sortie
         
         /* ===== MAPEOS DE DATOS ===== */
         
@@ -253,6 +454,30 @@
             'VoidT4': 'Axi',
             'VoidT5': 'Requiem',
             'VoidT6': 'Omni'
+        };
+        
+        // Traducción de planetas al español
+        const PLANET_TRANSLATION = {
+            'Mercury': 'Mercurio',
+            'Venus': 'Venus',
+            'Earth': 'Tierra',
+            'Mars': 'Marte',
+            'Phobos': 'Fobos',
+            'Ceres': 'Ceres',
+            'Jupiter': 'Júpiter',
+            'Europa': 'Europa',
+            'Saturn': 'Saturno',
+            'Uranus': 'Urano',
+            'Neptune': 'Neptuno',
+            'Pluto': 'Plutón',
+            'Sedna': 'Sedna',
+            'Eris': 'Eris',
+            'Void': 'Vacío',
+            'Lua': 'Lua',
+            'Deimos': 'Deimos',
+            'Zariman': 'Zariman',
+            'Duviri': 'Duviri',
+            'Unknown': 'Desconocido'
         };
 
         // Orden de tiers para mostrar
@@ -301,13 +526,35 @@
                 console.error('Error cargando nodos:', error);
             }
         }
+        
+        // Cargar datos de Sortie (modificadores y bosses)
+        async function loadSortieData() {
+            try {
+                const response = await fetch(SORTIE_DATA_URL);
+                const data = await response.json();
+                SORTIE_DATA = data;
+                console.log('Datos de Sortie cargados');
+            } catch (error) {
+                console.error('Error cargando datos de Sortie:', error);
+            }
+        }
 
         // Obtener información de un nodo específico
         function getNodeInfo(nodeKey) {
             const nodeInfo = NODE_DATA[nodeKey];
             if (nodeInfo) {
+                // Traducir el planeta en el nombre del nodo
+                let nodeName = nodeInfo.value || nodeKey;
+                // Buscar si contiene un planeta entre paréntesis y traducirlo
+                const planetMatch = nodeName.match(/\(([^)]+)\)/);
+                if (planetMatch) {
+                    const planet = planetMatch[1];
+                    const translatedPlanet = PLANET_TRANSLATION[planet] || planet;
+                    nodeName = nodeName.replace(`(${planet})`, `(${translatedPlanet})`);
+                }
+                
                 return {
-                    name: nodeInfo.value || nodeKey,
+                    name: nodeName,
                     enemy: nodeInfo.enemy || 'Desconocido',
                     type: nodeInfo.type || 'Desconocido'
                 };
@@ -365,7 +612,7 @@
 
             // ===== COLUMNA: FISURAS NORMALES =====
             html += '<div class="fissure-column">';
-            html += '<div class="column-header">Normales</div>';
+            html += '<div class="column-header" style="color: #EB6F92;">Normales</div>';
             
             if (normalFissures.length > 0) {
                 // Agrupar fisuras por tier
@@ -392,12 +639,13 @@
                             
                             html += `
                                 <div class="card" data-fissure-id="${fissure.id}">
-                                    <div class="card-title">${fissure.missionType}</div>
-                                    <div class="card-subtitle">${fissure.node}</div>
+                                    <div class="card-info">
+                                        <div class="card-title">${fissure.missionType}</div>
+                                        <div class="card-subtitle">${fissure.node} - ${fissure.enemy}</div>
+                                    </div>
                                     <div class="${timerClass}" data-expiry="${fissure.expiry}">
                                         ${formatTime(remaining)}
                                     </div>
-                                    <div class="info-tag">${fissure.enemy}</div>
                                 </div>
                             `;
                         });
@@ -405,13 +653,13 @@
                     }
                 });
             } else {
-                html += '<div class="card">No hay fisuras normales activas</div>';
+                html += '<div class="card"><div class="card-info"><div class="card-title">No hay fisuras normales activas</div></div></div>';
             }
             html += '</div>';
 
             // ===== COLUMNA: STEEL PATH =====
             html += '<div class="fissure-column">';
-            html += '<div class="column-header">Camino de acero</div>';
+            html += '<div class="column-header" style="color: #EB6F92;">Camino de acero</div>';
             
             if (steelPath.length > 0) {
                 // Agrupar fisuras por tier
@@ -438,12 +686,13 @@
                             
                             html += `
                                 <div class="card" data-fissure-id="${fissure.id}">
-                                    <div class="card-title">${fissure.missionType}</div>
-                                    <div class="card-subtitle">${fissure.node}</div>
+                                    <div class="card-info">
+                                        <div class="card-title">${fissure.missionType}</div>
+                                        <div class="card-subtitle">${fissure.node} - ${fissure.enemy}</div>
+                                    </div>
                                     <div class="${timerClass}" data-expiry="${fissure.expiry}">
                                         ${formatTime(remaining)}
                                     </div>
-                                    <div class="info-tag">${fissure.enemy}</div>
                                 </div>
                             `;
                         });
@@ -451,12 +700,374 @@
                     }
                 });
             } else {
-                html += '<div class="card">No hay fisuras Steel Path activas</div>';
+                html += '<div class="card"><div class="card-info"><div class="card-title">No hay fisuras Steel Path activas</div></div></div>';
             }
             html += '</div>';
 
             html += '</div>';
             return html;
+        }
+        
+        // Renderizar Sortie y Archon Hunt en contenedor separado
+        function renderMissions() {
+            const sortie = gameData.sortie;
+            const archonHunt = gameData.archonHunt;
+            
+            if (!sortie && !archonHunt) return '';
+            
+            let html = '<div class="missions-container">';
+            
+            // Sortie
+            if (sortie) {
+                const remaining = getTimeRemaining(sortie.expiry);
+                html += '<div class="mission-box">';
+                html += `<div style="font-size: 0.85rem; font-weight: 700; margin-bottom: 10px; color: #EB6F92; text-align: center; padding-bottom: 8px; border-bottom: 1px solid #2a3150;">Sortie - ${sortie.boss}</div>`;
+                html += `<div style="font-size: 0.7rem; color: #8b95a5; text-align: center; margin-bottom: 10px;">Expira en: <span class="timer" data-expiry="${sortie.expiry}">${formatTime(remaining)}</span></div>`;
+                
+                sortie.missions.forEach(mission => {
+                    html += `<div class="mission-item" style="margin-bottom: 8px; padding: 8px; background: #151933; border-radius: 4px; border: 1px solid #2a3150;">`;
+                    html += `<div style="font-size: 0.75rem; font-weight: 600; margin-bottom: 3px;">${mission.index}. ${mission.missionType}</div>`;
+                    html += `<div style="font-size: 0.65rem; color: #8b95a5; margin-bottom: 2px;">${mission.node} - ${mission.enemy}</div>`;
+                    html += `<div style="font-size: 0.65rem; color: #C55F7E;">${mission.modifier}</div>`;
+                    html += `</div>`;
+                });
+                
+                html += '</div>';
+            }
+            
+            // Archon Hunt
+            if (archonHunt) {
+                const remaining = getTimeRemaining(archonHunt.expiry);
+                html += '<div class="mission-box">';
+                html += `<div style="font-size: 0.85rem; font-weight: 700; margin-bottom: 8px; color: #EB6F92; text-align: center; padding-bottom: 8px; border-bottom: 1px solid #2a3150;">${archonHunt.boss}</div>`;
+                html += `<div style="font-size: 0.65rem; color: #C55F7E; text-align: center; margin-bottom: 8px;">${archonHunt.crystal}</div>`;
+                html += `<div style="font-size: 0.7rem; color: #8b95a5; text-align: center; margin-bottom: 10px;">Expira en: <span class="timer" data-expiry="${archonHunt.expiry}">${formatTime(remaining)}</span></div>`;
+                
+                archonHunt.missions.forEach(mission => {
+                    html += `<div class="mission-item" style="margin-bottom: 8px; padding: 8px; background: #151933; border-radius: 4px; border: 1px solid #2a3150;">`;
+                    html += `<div style="font-size: 0.75rem; font-weight: 600; margin-bottom: 3px;">${mission.index}. ${mission.missionType}</div>`;
+                    html += `<div style="font-size: 0.65rem; color: #8b95a5;">${mission.node} - ${mission.enemy}</div>`;
+                    html += `</div>`;
+                });
+                
+                html += '</div>';
+            }
+            
+            html += '</div>';
+            return html;
+        }
+        
+        /* ===== FUNCIONES DE PARSEO ===== */
+        
+        // Parsear ciclo planetario genérico desde SyndicateMissions
+        function parseCycle(syndicateMissions, tag) {
+            const mission = (syndicateMissions || []).find(m => m.Tag === tag);
+            if (!mission) return null;
+            
+            // Si no hay expiry, calcular uno genérico
+            const activation = mission.Activation ? new Date(parseInt(mission.Activation.$date.$numberLong)) : new Date();
+            const elapsed = Date.now() - activation.getTime();
+            
+            if (tag === 'CetusSyndicate') {
+                // Cetus: 100min día, 50min noche
+                const dayDuration = 100 * 60 * 1000;
+                const nightDuration = 50 * 60 * 1000;
+                const cycleTime = elapsed % (dayDuration + nightDuration);
+                const isDay = cycleTime < dayDuration;
+                const timeInPhase = isDay ? cycleTime : cycleTime - dayDuration;
+                const phaseDuration = isDay ? dayDuration : nightDuration;
+                const timeRemaining = phaseDuration - timeInPhase;
+                const nextExpiry = new Date(Date.now() + timeRemaining);
+                return { isDay, expiry: nextExpiry.toISOString() };
+            } else if (tag === 'SolarisSyndicate') {
+                // Orb Vallis: Hardcodeado - calor empieza 8 dic 2025 23:20 UTC
+                const referenceTime = 1765215228000; // 8 dic 2025, 23:20:00 UTC
+                const warmDuration = 400 * 1000;  // 6:40 = 400 segundos
+                const coldDuration = 1200 * 1000; // 20:00 = 1200 segundos
+                const totalCycle = warmDuration + coldDuration; // 1600s = 26:40
+                
+                const now = Date.now();
+                const elapsed = now - referenceTime;
+                const cycleTime = ((elapsed % totalCycle) + totalCycle) % totalCycle;
+                
+                // Empieza en calor en el reference time
+                const isWarm = cycleTime < warmDuration;
+                const timeInPhase = isWarm ? cycleTime : (cycleTime - warmDuration);
+                const phaseDuration = isWarm ? warmDuration : coldDuration;
+                const timeRemaining = phaseDuration - timeInPhase;
+                const nextExpiry = new Date(now + timeRemaining);
+                return { isWarm, expiry: nextExpiry.toISOString() };
+            }
+            
+            return null;
+        }
+        
+        // Parsear ciclo de Cambion (Fass/Vome) basado en timestamp
+        function parseCambionCycle(cetusData) {
+            // Cambion está sincronizado con Cetus: día=Fass, noche=Vome
+            if (!cetusData) return null;
+            
+            return {
+                active: cetusData.isDay ? 'fass' : 'vome',
+                expiry: cetusData.expiry
+            };
+        }
+        
+        // Parsear ciclo de Zariman (Grineer/Corpus control)
+        function parseZarimanCycle() {
+            // Zariman alterna entre Grineer y Corpus cada 150 minutos
+            const phaseMs = 150 * 60 * 1000;  // 150 minutos por fase
+            const cycleMs = phaseMs * 2; // 300 minutos total
+            
+            // Reference calculado: inicio de un ciclo de Corpus
+            const reference = 1765220979456; // Ajustado para coincidir exactamente
+            const now = Date.now();
+            const elapsed = now - reference;
+            const cyclePosition = elapsed % cycleMs;
+            const isCorpus = cyclePosition < phaseMs;
+            
+            const timeInPhase = isCorpus ? cyclePosition : cyclePosition - phaseMs;
+            const timeRemaining = phaseMs - timeInPhase;
+            const nextChange = new Date(now + timeRemaining);
+            
+            return {
+                state: isCorpus ? 'Corpus' : 'Grineer',
+                expiry: nextChange.toISOString()
+            };
+        }
+        
+        // Parsear ciclo de Duviri (Joy, Anger, Envy, Sorrow, Fear)
+        function parseDuviriCycle() {
+            // Duviri rota entre 5 moods cada 2 horas
+            const moods = ['Miedo', 'Alegría', 'Ira', 'Envidia', 'Tristeza'];
+            const cycleMs = 2 * 60 * 60 * 1000; // 2 horas por mood
+            
+            // Timestamp de referencia (inicio de Duviri Paradox: 26 Abril 2023)
+            const referenceStart = 1682467200000; // 26 Apr 2023 00:00 UTC
+            const now = Date.now();
+            const elapsed = now - referenceStart;
+            const totalCycles = Math.floor(elapsed / cycleMs);
+            const currentMoodIndex = totalCycles % moods.length;
+            
+            const cycleStart = referenceStart + (totalCycles * cycleMs);
+            const nextChange = new Date(cycleStart + cycleMs);
+            
+            return {
+                state: moods[currentMoodIndex],
+                expiry: nextChange.toISOString()
+            };
+        }
+        
+        // Cache para nombres de items
+        const itemNameCache = {};
+        
+        // Obtener nombre de item desde browse.wf
+        async function getItemName(itemPath, itemCount) {
+            if (!itemPath) return 'Unknown';
+            
+            // Verificar cache
+            if (itemNameCache[itemPath]) {
+                return `${itemCount}x ${itemNameCache[itemPath]}`;
+            }
+            
+            try {
+                // Obtener el archivo del item
+                const itemResponse = await fetch(`https://browse.wf${itemPath}`);
+                const itemData = await itemResponse.json();
+                
+                // Buscar el campo "name" que contiene la ruta al nombre traducido
+                const namePath = itemData.name;
+                if (!namePath) {
+                    const fallback = itemPath.split('/').pop().replace(/([A-Z])/g, ' $1').trim();
+                    itemNameCache[itemPath] = fallback;
+                    return `${itemCount}x ${fallback}`;
+                }
+                
+                // Obtener el nombre traducido en español
+                const nameResponse = await fetch(`https://browse.wf${namePath}`);
+                const nameData = await nameResponse.json();
+                
+                const spanishName = nameData.es || nameData.en || 'Unknown';
+                itemNameCache[itemPath] = spanishName;
+                return `${itemCount}x ${spanishName}`;
+            } catch (error) {
+                console.error('Error obteniendo nombre de item:', error);
+                const fallback = itemPath.split('/').pop().replace(/([A-Z])/g, ' $1').trim();
+                return `${itemCount}x ${fallback}`;
+            }
+        }
+        
+        // Parsear invasiones desde el endpoint /invasions
+        async function parseInvasions(invasions) {
+            // Agrupar invasiones por nodo (cada nodo puede tener 1 o 2 lados)
+            const byNode = {};
+            invasions.forEach(inv => {
+                if (!byNode[inv.node]) {
+                    byNode[inv.node] = [];
+                }
+                byNode[inv.node].push(inv);
+            });
+            
+            // Mapear facciones
+            const factionMap = {
+                'FC_GRINEER': 'Grineer',
+                'FC_CORPUS': 'Corpus',
+                'FC_INFESTATION': 'Infestados'
+            };
+            
+            // Convertir a lista de invasiones
+            const result = [];
+            for (const node in byNode) {
+                const sides = byNode[node];
+                const nodeInfo = getNodeInfo(node);
+                
+                if (sides.length >= 2) {
+                    // Invasión con 2 facciones
+                    const faction1 = factionMap[sides[0].ally] || sides[0].ally;
+                    const faction2 = factionMap[sides[1].ally] || sides[1].ally;
+                    
+                    // Obtener recompensas con nombres reales
+                    const reward1Promise = sides[0].allyPay && sides[0].allyPay[0] 
+                        ? getItemName(sides[0].allyPay[0].ItemType, sides[0].allyPay[0].ItemCount)
+                        : Promise.resolve('Unknown');
+                    const reward2Promise = sides[1].allyPay && sides[1].allyPay[0]
+                        ? getItemName(sides[1].allyPay[0].ItemType, sides[1].allyPay[0].ItemCount)
+                        : Promise.resolve('Unknown');
+                    
+                    const [reward1, reward2] = await Promise.all([reward1Promise, reward2Promise]);
+                    
+                    result.push({
+                        node: nodeInfo.name,
+                        attacker: faction1,
+                        defender: faction2,
+                        reward1: reward1,
+                        reward2: reward2,
+                        missions: sides[0].missions || [],
+                        completion: 50
+                    });
+                } else if (sides.length === 1) {
+                    // Invasión con 1 facción (contra Infestados - sin recompensa)
+                    const faction = factionMap[sides[0].ally] || sides[0].ally;
+                    const reward = sides[0].allyPay && sides[0].allyPay[0]
+                        ? await getItemName(sides[0].allyPay[0].ItemType, sides[0].allyPay[0].ItemCount)
+                        : 'Unknown';
+                    
+                    result.push({
+                        node: nodeInfo.name,
+                        attacker: faction,
+                        defender: 'Infestados',
+                        reward1: reward,
+                        reward2: null, // No hay recompensa por defender infestados
+                        missions: sides[0].missions || [],
+                        completion: 50
+                    });
+                }
+            }
+            
+            return result;
+        }
+        
+        // Parsear arquimedeas desde el endpoint /weekly
+        function parseArchimideans(data) {
+            const result = { temporal: null, deep: null };
+            
+            if (!data || !data.expiry) return result;
+            
+            const expiry = new Date(data.expiry * 1000); // timestamp en segundos
+            
+            // Hex Conquest (Temporal) - Hollvania
+            if (data.hexConquestMissions && data.hexConquestMissions.length > 0) {
+                result.temporal = {
+                    missions: data.hexConquestMissions,
+                    personalMods: data.hexConquestFrameVariables || [],
+                    location: 'Hollvania',
+                    expiry: expiry.toISOString()
+                };
+            }
+            
+            // Lab Conquest (Profunda) - Sanctum Anatomica
+            if (data.labConquestMissions && data.labConquestMissions.length > 0) {
+                result.deep = {
+                    missions: data.labConquestMissions,
+                    personalMods: data.labConquestFrameVariables || [],
+                    location: 'Sanctum Anatomica',
+                    expiry: expiry.toISOString()
+                };
+            }
+            
+            return result;
+        }
+        
+        // Parsear Sortie diaria
+        function parseSortie(sorties) {
+            if (!sorties || sorties.length === 0) return null;
+            
+            const sortie = sorties[0];
+            const expiry = new Date(parseInt(sortie.Expiry.$date.$numberLong));
+            const bossKey = sortie.Boss;
+            const bossData = SORTIE_DATA.bosses ? SORTIE_DATA.bosses[bossKey] : null;
+            
+            return {
+                boss: bossData ? bossData.name : bossKey,
+                faction: bossData ? bossData.faction : 'Unknown',
+                expiry: expiry.toISOString(),
+                missions: (sortie.Variants || []).map((variant, idx) => {
+                    const nodeInfo = getNodeInfo(variant.node);
+                    const missionType = MISSION_MAP[variant.missionType] || variant.missionType;
+                    const modifierKey = variant.modifierType;
+                    const modifierName = SORTIE_DATA.modifierTypes ? SORTIE_DATA.modifierTypes[modifierKey] : modifierKey;
+                    
+                    return {
+                        index: idx + 1,
+                        node: nodeInfo.name,
+                        missionType: missionType,
+                        modifier: modifierName,
+                        enemy: nodeInfo.enemy
+                    };
+                })
+            };
+        }
+        
+        // Parsear Archon Hunt (LiteSorties)
+        function parseArchonHunt(liteSorties) {
+            if (!liteSorties || liteSorties.length === 0) return null;
+            
+            const archonHunt = liteSorties[0];
+            const expiry = new Date(parseInt(archonHunt.Expiry.$date.$numberLong));
+            const bossKey = archonHunt.Boss;
+            const bossData = SORTIE_DATA.bosses ? SORTIE_DATA.bosses[bossKey] : null;
+            
+            // Traducir nombre de Archon a español
+            let bossName = bossData ? bossData.name : bossKey;
+            if (bossName.startsWith('Archon ')) {
+                bossName = bossName.replace('Archon ', 'Arconte ');
+            }
+            
+            // Determinar cristal según el arconte
+            const crystalMap = {
+                'SORTIE_BOSS_AMAR': 'Fragmento de arconte carmesí',
+                'SORTIE_BOSS_BOREAL': 'Fragmento de arconte celeste',
+                'SORTIE_BOSS_NIRA': 'Fragmento de arconte ámbar'
+            };
+            const crystal = crystalMap[bossKey] || 'Fragmento de arconte';
+            
+            return {
+                boss: bossName,
+                crystal: crystal,
+                faction: bossData ? bossData.faction : 'Narmer',
+                expiry: expiry.toISOString(),
+                missions: (archonHunt.Missions || []).map((mission, idx) => {
+                    const nodeInfo = getNodeInfo(mission.node);
+                    const missionType = MISSION_MAP[mission.missionType] || mission.missionType;
+                    
+                    return {
+                        index: idx + 1,
+                        node: nodeInfo.name,
+                        missionType: missionType,
+                        enemy: nodeInfo.enemy
+                    };
+                })
+            };
         }
         
         /* ===== FUNCIONES DE ACTUALIZACIÓN ===== */
@@ -532,13 +1143,37 @@
                 lastFissureIds = currentFissureIds;
                 console.log('Fisuras activas:', fissures.length);
 
+                // Parsear ciclos planetarios
+                const cetusData = parseCycle(data.SyndicateMissions, 'CetusSyndicate');
+                const cycles = {
+                    cetus: cetusData,
+                    vallis: parseCycle(data.SyndicateMissions, 'SolarisSyndicate'),
+                    cambion: parseCambionCycle(cetusData),
+                    zariman: parseZarimanCycle(),
+                    duviri: parseDuviriCycle()
+                };
+                
+                // Obtener invasiones de su endpoint
+                const invasionsResponse = await fetch(INVASIONS_URL);
+                const invasionsData = await invasionsResponse.json();
+                const invasions = await parseInvasions(invasionsData.invasions || []);
+                
+                // Obtener arquimedeas de su endpoint
+                const weeklyResponse = await fetch(WEEKLY_URL);
+                const weeklyData = await weeklyResponse.json();
+                const archimideans = parseArchimideans(weeklyData);
+                
+                // Parsear Sortie y Archon Hunt desde worldState
+                const sortie = parseSortie(data.Sorties);
+                const archonHunt = parseArchonHunt(data.LiteSorties);
+
                 // Guardar datos y renderizar
-                gameData = { fissures };
+                gameData = { fissures, cycles, invasions, archimideans, sortie, archonHunt };
                 render();
                 
             } catch (error) {
                 console.error('❌ Error:', error);
-                document.getElementById('content').innerHTML = `
+                document.getElementById('fissures-content').innerHTML = `
                     <div class="error">
                         ❌ Error al cargar datos: ${error.message}
                         <br><small>Reintentando en 10 segundos...</small>
@@ -550,8 +1185,318 @@
 
         // Renderizar todo el contenido
         function render() {
-            const html = renderFissures(Array.isArray(gameData.fissures) ? gameData.fissures : []);
-            document.getElementById('content').innerHTML = html;
+            // Renderizar fisuras
+            const fissuresHtml = renderFissures(Array.isArray(gameData.fissures) ? gameData.fissures : []);
+            document.getElementById('fissures-content').innerHTML = fissuresHtml;
+            
+            // Renderizar Sortie y Archon Hunt
+            const missionsHtml = renderMissions();
+            document.getElementById('missions-content').innerHTML = missionsHtml;
+            
+            // Renderizar sidebar (ciclos e invasiones)
+            renderSidebar();
+            
+            // Renderizar arquimedeas
+            renderArchimideans();
+        }
+        
+        // Diccionario de traducciones de Oracle (se carga dinámicamente)
+        let oracleTranslations = {};
+        
+        // Cargar diccionario de traducciones desde Oracle
+        async function loadOracleTranslations() {
+            try {
+                const response = await fetch('https://oracle.browse.wf/dicts/es.json');
+                if (response.ok) {
+                    oracleTranslations = await response.json();
+                    console.log('Diccionario de traducciones cargado:', Object.keys(oracleTranslations).length, 'entradas');
+                }
+            } catch (error) {
+                console.error('Error cargando traducciones:', error);
+            }
+        }
+        
+        // Obtener traducción desde el diccionario de Oracle
+        function getTranslation(key, type = 'Condition', conquestType = null) {
+            // Caso especial para variantes que tienen prefijo HexConquest o LabConquest
+            if (type === 'Variant' && conquestType) {
+                const fullPath = `/Lotus/Language/Conquest/MissionVariant_${conquestType}Conquest_${key}`;
+                return oracleTranslations[fullPath] || key;
+            }
+            
+            // Buscar en el diccionario con el path completo
+            const fullPath = `/Lotus/Language/Conquest/${type}_${key}`;
+            return oracleTranslations[fullPath] || key;
+        }
+        
+        // Obtener descripción desde el diccionario de Oracle
+        function getDescription(key, type = 'Condition', conquestType = null) {
+            // Caso especial para variantes que tienen prefijo HexConquest o LabConquest
+            if (type === 'Variant' && conquestType) {
+                const fullPath = `/Lotus/Language/Conquest/MissionVariant_${conquestType}Conquest_${key}_Desc`;
+                return oracleTranslations[fullPath] || '';
+            }
+            
+            const fullPath = `/Lotus/Language/Conquest/${type}_${key}_Desc`;
+            return oracleTranslations[fullPath] || '';
+        }
+        
+        // Traducir tipos de misión (estos no están en Conquest)
+        function translateMissionType(type) {
+            const missionTypes = {
+                'Survival': 'Supervivencia',
+                'Defense': 'Defensa',
+                'Exterminate': 'Exterminio',
+                'Assassination': 'Asesinato',
+                'Artifact': 'Interrupción',
+                'Excavate': 'Excavación',
+                'Capture': 'Captura',
+                'Rescue': 'Rescate',
+                'Sabotage': 'Sabotaje'
+            };
+            return missionTypes[type] || type;
+        }
+        
+        // Renderizar arquimedeas
+        function renderArchimideans() {
+            const archimideans = gameData.archimideans || {};
+            let html = '';
+            
+            if (archimideans.temporal || archimideans.deep) {
+                html += '<div style="margin-top: 20px; padding: 15px; background: #0F1219; border-radius: 8px;">';
+                
+                // Calcular tiempo de rotación (usar el menor de los dos)
+                let rotationTime = '';
+                if (archimideans.temporal) {
+                    rotationTime = `<span class="timer" data-expiry="${archimideans.temporal.expiry}">${formatTime(getTimeRemaining(archimideans.temporal.expiry))}</span>`;
+                } else if (archimideans.deep) {
+                    rotationTime = `<span class="timer" data-expiry="${archimideans.deep.expiry}">${formatTime(getTimeRemaining(archimideans.deep.expiry))}</span>`;
+                }
+                
+                html += `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">`;
+                html += `<h2 style="font-size: 1rem; margin: 0; color: #EB6F92;">Arquimedeas</h2>`;
+                html += `<div style="font-size: 0.75rem; color: #8b95a5;">Rotan en: ${rotationTime}</div>`;
+                html += `</div>`;
+                
+                html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 15px;">';
+                
+                // Arquimedea Temporal
+                if (archimideans.temporal) {
+                    html += '<div style="background: #151933; border: 1px solid #2a3150; border-radius: 6px; padding: 12px;">';
+                    html += `<div style="font-size: 0.9rem; font-weight: 700; margin-bottom: 10px; color: #EB6F92;">Temporal - ${archimideans.temporal.location}</div>`;
+                    
+                    // Personal Mods
+                    if (archimideans.temporal.personalMods && archimideans.temporal.personalMods.length > 0) {
+                        html += '<div style="margin-bottom: 12px; padding: 8px; background: #1a1f3a; border-radius: 4px; border: 1px solid #2a3150;">';
+                        html += '<div style="font-size: 0.7rem; font-weight: 600; margin-bottom: 6px; color: #ffffff;">Modificadores Personales:</div>';
+                        const modsHtml = archimideans.temporal.personalMods.map(mod => {
+                            const modName = getTranslation(mod, 'PersonalMod');
+                            const modDesc = getDescription(mod, 'PersonalMod');
+                            if (modDesc) {
+                                return `<span class="modifier-tooltip" style="display: inline-block; margin: 2px 4px; padding: 3px 8px; background: #0f1219; border-radius: 3px; font-size: 0.65rem;">${modName}<span class="tooltip-content">${modDesc}</span></span>`;
+                            }
+                            return `<span style="display: inline-block; margin: 2px 4px; padding: 3px 8px; background: #0f1219; border-radius: 3px; font-size: 0.65rem;">${modName}</span>`;
+                        }).join('');
+                        html += `<div style="display: flex; flex-wrap: wrap;">${modsHtml}</div>`;
+                        html += '</div>';
+                    }
+                    
+                    archimideans.temporal.missions.forEach((mission, idx) => {
+                        const missionType = translateMissionType(mission.type);
+                        const variant = mission.variant ? getTranslation(mission.variant, 'Variant', 'Hex') : '';
+                        
+                        html += `<div class="mission-item" style="margin-bottom: 8px; padding: 8px; background: #0f1219; border-radius: 4px; border: 1px solid #2a3150;">`;
+                        html += `<div style="font-size: 0.75rem; font-weight: 600; margin-bottom: 4px;">Misión ${idx + 1}: ${missionType}</div>`;
+                        if (variant) {
+                            const variantDesc = getDescription(mission.variant, 'Variant', 'Hex');
+                            if (variantDesc) {
+                                html += `<div style="font-size: 0.65rem; color: #8b95a5; margin-bottom: 2px;">Variante: <span class="modifier-tooltip">${variant}<span class="tooltip-content">${variantDesc}</span></span></div>`;
+                            } else {
+                                html += `<div style="font-size: 0.65rem; color: #8b95a5; margin-bottom: 2px;">Variante: ${variant}</div>`;
+                            }
+                        }
+                        if (mission.conditions && mission.conditions.length > 0) {
+                            const modifiersHtml = mission.conditions.map(condition => {
+                                const conditionName = getTranslation(condition, 'Condition');
+                                const conditionDesc = getDescription(condition, 'Condition');
+                                if (conditionDesc) {
+                                    return `<span class="modifier-tooltip">${conditionName}<span class="tooltip-content">${conditionDesc}</span></span>`;
+                                }
+                                return conditionName;
+                            }).join(', ');
+                            html += `<div style="font-size: 0.65rem; color: #C55F7E;">Modificadores: ${modifiersHtml}</div>`;
+                        }
+                        html += '</div>';
+                    });
+                    html += '</div>';
+                }
+                
+                // Arquimedea Profunda
+                if (archimideans.deep) {
+                    html += '<div style="background: #151933; border: 1px solid #2a3150; border-radius: 6px; padding: 12px;">';
+                    html += `<div style="font-size: 0.9rem; font-weight: 700; margin-bottom: 10px; color: #EB6F92;">Profunda - ${archimideans.deep.location}</div>`;
+                    
+                    // Personal Mods para Profunda
+                    if (archimideans.deep.personalMods && archimideans.deep.personalMods.length > 0) {
+                        html += '<div style="margin-bottom: 12px; padding: 8px; background: #1a1f3a; border-radius: 4px; border: 1px solid #2a3150;">';
+                        html += '<div style="font-size: 0.7rem; font-weight: 600; margin-bottom: 6px; color: #ffffff;">Modificadores Personales:</div>';
+                        const modsHtml = archimideans.deep.personalMods.map(mod => {
+                            const modName = getTranslation(mod, 'PersonalMod');
+                            const modDesc = getDescription(mod, 'PersonalMod');
+                            if (modDesc) {
+                                return `<span class="modifier-tooltip" style="display: inline-block; margin: 2px 4px; padding: 3px 8px; background: #0f1219; border-radius: 3px; font-size: 0.65rem;">${modName}<span class="tooltip-content">${modDesc}</span></span>`;
+                            }
+                            return `<span style="display: inline-block; margin: 2px 4px; padding: 3px 8px; background: #0f1219; border-radius: 3px; font-size: 0.65rem;">${modName}</span>`;
+                        }).join('');
+                        html += `<div style="display: flex; flex-wrap: wrap;">${modsHtml}</div>`;
+                        html += '</div>';
+                    }
+                    
+                    archimideans.deep.missions.forEach((mission, idx) => {
+                        const missionType = translateMissionType(mission.type);
+                        const variant = mission.variant ? getTranslation(mission.variant, 'Variant', 'Lab') : '';
+                        
+                        html += `<div class="mission-item" style="margin-bottom: 8px; padding: 8px; background: #0f1219; border-radius: 4px; border: 1px solid #2a3150;">`;
+                        html += `<div style="font-size: 0.75rem; font-weight: 600; margin-bottom: 4px;">Misión ${idx + 1}: ${missionType}</div>`;
+                        if (variant) {
+                            const variantDesc = getDescription(mission.variant, 'Variant', 'Lab');
+                            if (variantDesc) {
+                                html += `<div style="font-size: 0.65rem; color: #8b95a5; margin-bottom: 2px;">Variante: <span class="modifier-tooltip">${variant}<span class="tooltip-content">${variantDesc}</span></span></div>`;
+                            } else {
+                                html += `<div style="font-size: 0.65rem; color: #8b95a5; margin-bottom: 2px;">Variante: ${variant}</div>`;
+                            }
+                        }
+                        if (mission.conditions && mission.conditions.length > 0) {
+                            const modifiersHtml = mission.conditions.map(condition => {
+                                const conditionName = getTranslation(condition, 'Condition');
+                                const conditionDesc = getDescription(condition, 'Condition');
+                                if (conditionDesc) {
+                                    return `<span class="modifier-tooltip">${conditionName}<span class="tooltip-content">${conditionDesc}</span></span>`;
+                                }
+                                return conditionName;
+                            }).join(', ');
+                            html += `<div style="font-size: 0.65rem; color: #C55F7E;">Modificadores: ${modifiersHtml}</div>`;
+                        }
+                        html += '</div>';
+                    });
+                    html += '</div>';
+                }
+                
+                html += '</div></div>';
+            }
+            
+            document.getElementById('archimidean-content').innerHTML = html;
+        }
+        
+        // Renderizar sidebar con ciclos e invasiones
+        function renderSidebar() {
+            const cycles = gameData.cycles || {};
+            const invasions = gameData.invasions || [];
+            
+            let html = '<div class="sidebar-section">';
+            html += '<div class="sidebar-header" style="color: #EB6F92;">Ciclos</div>';
+            
+            // Cetus
+            if (cycles.cetus) {
+                const cetusIcon = cycles.cetus.isDay ? '☀️' : '🌙';
+                const cetusState = cycles.cetus.isDay ? 'Día' : 'Noche';
+                html += `
+                    <div class="sidebar-item">
+                        ${cetusIcon} <strong>Cetus:</strong> ${cetusState}
+                        <div class="timer" data-expiry="${cycles.cetus.expiry}">${formatTime(getTimeRemaining(cycles.cetus.expiry))}</div>
+                    </div>
+                `;
+            } else {
+                html += `<div class="sidebar-item">🏜️ <strong>Cetus:</strong> No disponible</div>`;
+            }
+            
+            // Orb Vallis
+            if (cycles.vallis) {
+                const vallisIcon = cycles.vallis.isWarm ? '☀️' : '❄️';
+                const vallisState = cycles.vallis.isWarm ? 'Cálido' : 'Frío';
+                html += `
+                    <div class="sidebar-item">
+                        ${vallisIcon} <strong>Orb Vallis:</strong> ${vallisState}
+                        <div class="timer" data-expiry="${cycles.vallis.expiry}">${formatTime(getTimeRemaining(cycles.vallis.expiry))}</div>
+                    </div>
+                `;
+            }
+            
+            // Cambion Drift
+            if (cycles.cambion) {
+                const cambionIcon = cycles.cambion.active === 'fass' ? '🔴' : '🔵';
+                const cambionState = cycles.cambion.active === 'fass' ? 'Fass' : 'Vome';
+                html += `
+                    <div class="sidebar-item">
+                        ${cambionIcon} <strong>Cambion:</strong> ${cambionState}
+                        <div class="timer" data-expiry="${cycles.cambion.expiry}">${formatTime(getTimeRemaining(cycles.cambion.expiry))}</div>
+                    </div>
+                `;
+            }
+            
+            // Zariman
+            if (cycles.zariman) {
+                const zarimanIcon = cycles.zariman.state === 'Grineer' ? '🔴' : '🔵';
+                html += `
+                    <div class="sidebar-item">
+                        ${zarimanIcon} <strong>Zariman:</strong> ${cycles.zariman.state}
+                        <div class="timer" data-expiry="${cycles.zariman.expiry}">${formatTime(getTimeRemaining(cycles.zariman.expiry))}</div>
+                    </div>
+                `;
+            }
+            
+            // Duviri
+            if (cycles.duviri) {
+                const duviriIcons = {
+                    'Joy': '',
+                    'Anger': '',
+                    'Envy': '',
+                    'Sorrow': '',
+                    'Fear': ''
+                };
+                const duviriIcon = duviriIcons[cycles.duviri.state] || '';
+                html += `
+                    <div class="sidebar-item">
+                        ${duviriIcon} <strong>Duviri:</strong> ${cycles.duviri.state}
+                        <div class="timer" data-expiry="${cycles.duviri.expiry}">${formatTime(getTimeRemaining(cycles.duviri.expiry))}</div>
+                    </div>
+                `;
+            } else {
+                html += `<div class="sidebar-item">🌊 <strong>Duviri:</strong> No disponible</div>`;
+            }
+            
+            html += '</div>'; // fin sidebar-section ciclos
+            
+            // Invasiones
+            html += '<div class="sidebar-section">';
+            html += '<div style="color: #EB6F92;" class="sidebar-header">Invasiones</div>';
+            
+            if (invasions.length > 0) {
+                invasions.forEach(inv => {
+                    html += `
+                        <div class="sidebar-item">
+                            <div style="font-weight: 600; margin-bottom: 4px;">${inv.node}</div>
+                            <div style="font-size: 0.65rem; color: #8b95a5; margin-bottom: 2px;">
+                                ${inv.missions.join(', ')}
+                            </div>
+                            <div style="font-size: 0.65rem; margin-bottom: 3px;">
+                                🔴 ${inv.attacker}: ${inv.reward1}
+                            </div>
+                            ${inv.reward2 ? `<div style="font-size: 0.65rem;">
+                                🔵 ${inv.defender}: ${inv.reward2}
+                            </div>` : `<div style="font-size: 0.65rem; color: #666;">
+                                🔵 ${inv.defender}: Sin recompensa
+                            </div>`}
+                        </div>
+                    `;
+                });
+            } else {
+                html += '<div class="sidebar-item">No hay invasiones activas</div>';
+            }
+            
+            html += '</div>'; // fin sidebar-section invasiones
+            
+            document.getElementById('sidebar').innerHTML = html;
         }
         
         /* ===== INICIALIZACIÓN ===== */
@@ -560,6 +1505,8 @@
         async function init() {
             console.log('Iniciando...');
             await loadNodeData(); // Cargar datos de nodos
+            await loadSortieData(); // Cargar datos de Sortie
+            await loadOracleTranslations(); // Cargar traducciones de Oracle
             await fetchData(); // Cargar fisuras
             setInterval(updateTimers, 1000); // Actualizar timers cada 1 segundo
             setInterval(fetchData, 30000); // Actualizar datos cada 30 segundos
