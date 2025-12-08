@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fisuras del Vacío - Warframe</title>
+    
+    <!-- ==================== ESTILOS CSS ==================== -->
+    <style>
+        /* Reset básico para eliminar márgenes y padding por defecto */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Estilos generales del body con tema Rose Pine */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #191724; /* Fondo oscuro Rose Pine */
+            color: #e0e6ed; /* Texto claro */
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        /* Contenedor principal centrado */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Cabecera con título */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+        }
+
+        /* Título principal con degradado Rose Pine */
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #C55F7E 0%, #EB6F92 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Separador de imagen */
+        .separator {
+            text-align: center;
+            margin: 20px auto;
+            padding: 15px 0;
+        }
+        
+        .separator img {
+            height: 30px;
+            width: auto;
+            opacity: 0.7;
+            display: inline-block;
+            margin: 0;
+        }
+
+        /* Contenedor de 2 columnas para fisuras (Normales | Steel Path) */
+        .fissures-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Dos columnas iguales */
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        /* Cada columna de fisuras */
+        .fissure-column {
+            background: #0f1219;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #1a1f3a;
+        }
+
+        /* Encabezado de cada columna */
+        .column-header {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #2a3150;
+        }
+
+        /* Grupo de fisuras por tier (Lith, Meso, Neo, etc) */
+        .tier-group {
+            margin-bottom: 20px;
+        }
+
+        /* Título de cada tier */
+        .tier-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #8b95a5;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Card individual para cada fisura */
+        .card {
+            background: #151933;
+            border: 1px solid #2a3150;
+            border-radius: 8px;
+            padding: 12px;
+            transition: all 0.3s;
+            margin-bottom: 8px;
+        }
+
+        /* Efecto hover en las cards */
+        .card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.15);
+        }
+
+        /* Título de la card (tipo de misión) */
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Subtítulo de la card (nodo/planeta) */
+        .card-subtitle {
+            color: #8b95a5;
+            font-size: 0.8rem;
+            margin-bottom: 6px;
+        }
+
+        /* Timer de cuenta regresiva */
+        .timer {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin: 6px 0;
+            font-variant-numeric: tabular-nums; /* Números alineados */
+        }
+
+        /* Timer cuando está por expirar (menos de 10 min) */
+        .timer.expiring {
+            color: #f59e0b;
+            animation: pulse 2s infinite;
+        }
+
+        /* Animación de pulso para timers expirando */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* Etiqueta de información (enemigo, facción, etc) */
+        .info-tag {
+            background: #2a3150;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: #a5b4c7;
+        }
+
+        /* Mensaje de carga */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            color: #8b95a5;
+        }
+
+        /* Mensaje de error */
+        .error {
+            background: #7f1d1d;
+            border: 1px solid #991b1b;
+            color: #fecaca;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        /* Responsive: en móviles las columnas se apilan */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .fissures-container {
+                grid-template-columns: 1fr; /* Una sola columna */
+            }
+        }
+
+        /* Footer con última actualización */
+        footer {
+            text-align: center;
+            padding: 15px 0;
+            margin-top: 30px;
+            border-top: 1px solid #1a1f3a;
+            color: #8b95a5;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Título principal -->
+        <header>
+            <h1>Fisuras del vacío</h1>
+        </header>
+        
+        <!-- Separador con imagen repetida -->
+        <div class="separator">
+            <img src="./1.gif">
+            <img src="./1.gif">
+            <img src="./1.gif">
+            <img src="./1.gif">
+            <img src="./1.gif">
+        </div>
+        
+        <!-- Contenedor donde se cargarán las fisuras -->
+        <div id="content">
+            <div class="loading">⏳ Cargando datos...</div>
+        </div>
+        
+        <!-- Footer con timestamp de última actualización -->
+        <footer>
+            Última actualización: <span id="lastUpdate">Cargando...</span>
+        </footer>
+    </div>
+
+    <!-- ==================== JAVASCRIPT ==================== -->
+    <script>
+        /* ===== CONFIGURACIÓN ===== */
+        
+        // URL de la API de Warframe
+        const WORLDSTATE_URL = 'https://oracle.browse.wf/worldState.json';
+        
+        // Variables globales
+        let gameData = {}; // Almacena los datos de fisuras
+        let lastFissureIds = new Set(); // Para detectar nuevas fisuras
+        
+        /* ===== MAPEOS DE DATOS ===== */
+        
+        // Mapeo de tiers de reliquias
+        const TIER_MAP = {
+            'VoidT1': 'Lith',
+            'VoidT2': 'Meso', 
+            'VoidT3': 'Neo',
+            'VoidT4': 'Axi',
+            'VoidT5': 'Requiem',
+            'VoidT6': 'Omni'
+        };
+
+        // Orden de tiers para mostrar
+        const TIER_ORDER = ['Lith', 'Meso', 'Neo', 'Axi', 'Requiem', 'Omni'];
+
+        // Mapeo de tipos de misión a español
+        const MISSION_MAP = {
+            'MT_EXCAVATE': 'Excavación',
+            'MT_EXTERMINATION': 'Exterminio',
+            'MT_SURVIVAL': 'Supervivencia',
+            'MT_RESCUE': 'Rescate',
+            'MT_SABOTAGE': 'Sabotaje',
+            'MT_CAPTURE': 'Captura',
+            'MT_MOBILE_DEFENSE': 'Defensa móvil',
+            'MT_DEFENSE': 'Defensa',
+            'MT_ASSASSINATION': 'Asesinato',
+            'MT_INTEL': 'Espionaje',
+            'MT_ARTIFACT': 'Interrupción',
+            'MT_TERRITORY': 'Interceptación',
+            'MT_EVACUATION': 'Evacuación',
+            'MT_HIVE': 'Colmena',
+            'MT_RETRIEVAL': 'Usurpación',
+            'MT_ASSAULT': 'Acometida',
+            'MT_ARENA': 'Arena',
+            'MT_ALCHEMY': 'Alquimia',
+            'MT_VOID_CASCADE': 'Cascada del vacío',
+            'MT_CORRUPTION': 'Inundación del vacío',
+            'MT_LANDSCAPE': 'Recorrido libre',
+            'MT_RACE': 'Estampida',
+            'MT_PURSUIT': 'Persecución',
+        };
+
+        // Almacena información de nodos (planetas, enemigos)
+        let NODE_DATA = {};
+        
+        /* ===== FUNCIONES DE DATOS ===== */
+        
+        // Cargar datos de nodos desde GitHub
+        async function loadNodeData() {
+            try {
+                const response = await fetch('https://raw.githubusercontent.com/WFCD/warframe-worldstate-data/master/data/solNodes.json');
+                const data = await response.json();
+                NODE_DATA = data;
+                console.log('Nodos cargados:', Object.keys(NODE_DATA).length);
+            } catch (error) {
+                console.error('Error cargando nodos:', error);
+            }
+        }
+
+        // Obtener información de un nodo específico
+        function getNodeInfo(nodeKey) {
+            const nodeInfo = NODE_DATA[nodeKey];
+            if (nodeInfo) {
+                return {
+                    name: nodeInfo.value || nodeKey,
+                    enemy: nodeInfo.enemy || 'Desconocido',
+                    type: nodeInfo.type || 'Desconocido'
+                };
+            }
+            return {
+                name: nodeKey,
+                enemy: 'Desconocido',
+                type: 'Desconocido'
+            };
+        }
+        
+        /* ===== FUNCIONES DE TIEMPO ===== */
+        
+        // Formatear milisegundos a texto legible (ej: 2h 15m 30s)
+        function formatTime(ms) {
+            const seconds = Math.floor(ms / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+
+            if (days > 0) return `${days}d ${hours % 24}h ${minutes % 60}m`;
+            if (hours > 0) return `${hours}h ${minutes % 60}m ${seconds % 60}s`;
+            if (minutes > 0) return `${minutes}m ${seconds % 60}s`;
+            return `${seconds}s`;
+        }
+
+        // Calcular tiempo restante hasta que expire
+        function getTimeRemaining(expiry) {
+            return new Date(expiry) - Date.now();
+        }
+
+        // Verificar si una fisura está por expirar (menos de 10 min)
+        function isExpiringSoon(ms) {
+            return ms > 0 && ms < 600000; // 600000ms = 10 minutos
+        }
+        
+        /* ===== FUNCIONES DE RENDERIZADO ===== */
+        
+        // Función principal que genera el HTML de las fisuras
+        function renderFissures(fissures) {
+            // Validar que hay fisuras
+            if (!fissures || !Array.isArray(fissures)) {
+                return '<div class="error">No se pudieron cargar las fisuras</div>';
+            }
+
+            if (fissures.length === 0) {
+                return '<div class="error">No hay fisuras activas en este momento</div>';
+            }
+
+            // Separar fisuras normales y Steel Path
+            const normalFissures = fissures.filter(f => !f.isHard);
+            const steelPath = fissures.filter(f => f.isHard);
+
+            let html = '<div class="fissures-container">';
+
+            // ===== COLUMNA: FISURAS NORMALES =====
+            html += '<div class="fissure-column">';
+            html += '<div class="column-header">Normales</div>';
+            
+            if (normalFissures.length > 0) {
+                // Agrupar fisuras por tier
+                const byTier = {};
+                TIER_ORDER.forEach(tier => { byTier[tier] = []; });
+                
+                normalFissures.forEach(fissure => {
+                    const tier = fissure.tier || 'Unknown';
+                    if (byTier[tier]) {
+                        byTier[tier].push(fissure);
+                    }
+                });
+
+                // Renderizar cada tier
+                TIER_ORDER.forEach(tier => {
+                    const tierFissures = byTier[tier];
+                    if (tierFissures && tierFissures.length > 0) {
+                        html += `<div class="tier-group">`;
+                        html += `<div class="tier-title">${tier}</div>`;
+                        
+                        tierFissures.forEach(fissure => {
+                            const remaining = getTimeRemaining(fissure.expiry);
+                            const timerClass = isExpiringSoon(remaining) ? 'timer expiring' : 'timer';
+                            
+                            html += `
+                                <div class="card" data-fissure-id="${fissure.id}">
+                                    <div class="card-title">${fissure.missionType}</div>
+                                    <div class="card-subtitle">${fissure.node}</div>
+                                    <div class="${timerClass}" data-expiry="${fissure.expiry}">
+                                        ${formatTime(remaining)}
+                                    </div>
+                                    <div class="info-tag">${fissure.enemy}</div>
+                                </div>
+                            `;
+                        });
+                        html += '</div>';
+                    }
+                });
+            } else {
+                html += '<div class="card">No hay fisuras normales activas</div>';
+            }
+            html += '</div>';
+
+            // ===== COLUMNA: STEEL PATH =====
+            html += '<div class="fissure-column">';
+            html += '<div class="column-header">Camino de acero</div>';
+            
+            if (steelPath.length > 0) {
+                // Agrupar fisuras por tier
+                const byTier = {};
+                TIER_ORDER.forEach(tier => { byTier[tier] = []; });
+                
+                steelPath.forEach(fissure => {
+                    const tier = fissure.tier || 'Unknown';
+                    if (byTier[tier]) {
+                        byTier[tier].push(fissure);
+                    }
+                });
+
+                // Renderizar cada tier
+                TIER_ORDER.forEach(tier => {
+                    const tierFissures = byTier[tier];
+                    if (tierFissures && tierFissures.length > 0) {
+                        html += `<div class="tier-group">`;
+                        html += `<div class="tier-title">${tier}</div>`;
+                        
+                        tierFissures.forEach(fissure => {
+                            const remaining = getTimeRemaining(fissure.expiry);
+                            const timerClass = isExpiringSoon(remaining) ? 'timer expiring' : 'timer';
+                            
+                            html += `
+                                <div class="card" data-fissure-id="${fissure.id}">
+                                    <div class="card-title">${fissure.missionType}</div>
+                                    <div class="card-subtitle">${fissure.node}</div>
+                                    <div class="${timerClass}" data-expiry="${fissure.expiry}">
+                                        ${formatTime(remaining)}
+                                    </div>
+                                    <div class="info-tag">${fissure.enemy}</div>
+                                </div>
+                            `;
+                        });
+                        html += '</div>';
+                    }
+                });
+            } else {
+                html += '<div class="card">No hay fisuras Steel Path activas</div>';
+            }
+            html += '</div>';
+
+            html += '</div>';
+            return html;
+        }
+        
+        /* ===== FUNCIONES DE ACTUALIZACIÓN ===== */
+        
+        // Actualizar todos los timers en pantalla (se ejecuta cada segundo)
+        function updateTimers() {
+            document.querySelectorAll('.timer[data-expiry]').forEach(timer => {
+                const expiry = timer.dataset.expiry;
+                const remaining = getTimeRemaining(expiry);
+                
+                if (remaining <= 0) {
+                    timer.textContent = 'Expiró';
+                    timer.classList.add('expiring');
+                } else {
+                    timer.textContent = formatTime(remaining);
+                    if (isExpiringSoon(remaining)) {
+                        timer.classList.add('expiring');
+                    } else {
+                        timer.classList.remove('expiring');
+                    }
+                }
+            });
+
+            // Actualizar timestamp en footer
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('es-ES');
+        }
+
+        // Cargar datos desde la API
+        async function fetchData() {
+            try {
+                const response = await fetch(WORLDSTATE_URL);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                // Parsear fisuras desde ActiveMissions
+                const currentFissureIds = new Set();
+                const fissures = (data.ActiveMissions || [])
+                    .filter(mission => {
+                        // Filtrar solo fisuras activas (no expiradas)
+                        const expiry = new Date(parseInt(mission.Expiry.$date.$numberLong));
+                        return expiry > Date.now();
+                    })
+                    .map(mission => {
+                        const id = mission._id.$oid;
+                        currentFissureIds.add(id);
+                        
+                        const expiry = new Date(parseInt(mission.Expiry.$date.$numberLong));
+                        const tier = TIER_MAP[mission.Modifier] || mission.Modifier;
+                        const missionType = MISSION_MAP[mission.MissionType] || mission.MissionType;
+                        const nodeInfo = getNodeInfo(mission.Node);
+                        
+                        return {
+                            id: id,
+                            tier: tier,
+                            missionType: missionType,
+                            node: nodeInfo.name,
+                            enemy: nodeInfo.enemy,
+                            expiry: expiry.toISOString(),
+                            isHard: mission.Hard || false
+                        };
+                    });
+                
+                // Detectar nuevas fisuras
+                const newFissures = Array.from(currentFissureIds).filter(id => !lastFissureIds.has(id));
+                if (newFissures.length > 0 && lastFissureIds.size > 0) {
+                    console.log('Nuevas fisuras detectadas:', newFissures.length);
+                }
+                
+                lastFissureIds = currentFissureIds;
+                console.log('Fisuras activas:', fissures.length);
+
+                // Guardar datos y renderizar
+                gameData = { fissures };
+                render();
+                
+            } catch (error) {
+                console.error('❌ Error:', error);
+                document.getElementById('content').innerHTML = `
+                    <div class="error">
+                        ❌ Error al cargar datos: ${error.message}
+                        <br><small>Reintentando en 10 segundos...</small>
+                    </div>
+                `;
+                setTimeout(fetchData, 10000);
+            }
+        }
+
+        // Renderizar todo el contenido
+        function render() {
+            const html = renderFissures(Array.isArray(gameData.fissures) ? gameData.fissures : []);
+            document.getElementById('content').innerHTML = html;
+        }
+        
+        /* ===== INICIALIZACIÓN ===== */
+        
+        // Inicializar la aplicación
+        async function init() {
+            console.log('Iniciando...');
+            await loadNodeData(); // Cargar datos de nodos
+            await fetchData(); // Cargar fisuras
+            setInterval(updateTimers, 1000); // Actualizar timers cada 1 segundo
+            setInterval(fetchData, 30000); // Actualizar datos cada 30 segundos
+        }
+        
+        // Ejecutar al cargar la página
+        init();
+    </script>
+</body>
+</html>
