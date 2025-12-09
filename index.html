@@ -245,7 +245,7 @@
         /* Estilos para sidebar (ciclos e invasiones) */
         .sidebar-section {
             background: #0f1219;
-            padding: 8px;
+            padding: 12px;
             border-radius: 6px;
             border: 1px solid #1a1f3a;
         }
@@ -263,7 +263,7 @@
             background: #151933;
             border: 1px solid #2a3150;
             border-radius: 4px;
-            padding: 6px 8px;
+            padding: 10px 12px;
             margin-bottom: 6px;
             font-size: 0.7rem;
             transition: all 0.2s;
@@ -1051,7 +1051,7 @@
                 result.temporal = {
                     missions: data.hexConquestMissions,
                     personalMods: data.hexConquestFrameVariables || [],
-                    location: 'Hollvania',
+                    location: 'Höllvania',
                     expiry: expiry.toISOString()
                 };
             }
@@ -1334,7 +1334,10 @@
             let html = '';
             
             if (archimideans.temporal || archimideans.deep) {
-                html += '<div style="margin-top: 20px; padding: 15px; background: #0F1219; border-radius: 8px;">';
+                // Layout vertical cuando es view exclusiva de arquimedeas
+                const isArquimideasView = window.VIEW_FILTER === 'arquimedeas';
+                const outerContainerStyle = isArquimideasView ? 'margin-top: 20px; padding: 15px; background: #0F1219; border-radius: 8px; max-width: 600px; margin-left: auto; margin-right: auto;' : 'margin-top: 20px; padding: 15px; background: #0F1219; border-radius: 8px;';
+                html += `<div style="${outerContainerStyle}">`;
                 
                 // Calcular tiempo de rotación (usar el menor de los dos)
                 let rotationTime = '';
@@ -1345,16 +1348,69 @@
                 }
                 
                 html += `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">`;
-                html += `<h2 style="font-size: 1rem; margin: 0; color: #EB6F92;">Arquimedeas</h2>`;
+                html += `<h2 style="font-size: 1rem; margin: 0; color: #EB6F92;"></h2>`;
                 html += `<div style="font-size: 0.75rem; color: #8b95a5;">Rotan en: ${rotationTime}</div>`;
                 html += `</div>`;
                 
-                html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 15px;">';
+                const containerStyle = isArquimideasView ? 'max-width: 600px; margin: 0 auto;' : '';
+                const gridStyle = isArquimideasView ? 'display: flex; flex-direction: column; gap: 15px;' : 'display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 15px;';
+                html += `<div style="${containerStyle}"><div style="${gridStyle}">`;
+                
+                // Arquimedea Profunda primero en view exclusiva
+                if (isArquimideasView && archimideans.deep) {
+                    html += '<div style="background: #151933; border: 1px solid #2a3150; border-radius: 6px; padding: 12px;">';
+                    html += `<div style="font-size: 0.9rem; font-weight: 700; margin-bottom: 10px; color: #EB6F92;">Arquimedea profunda - ${archimideans.deep.location}</div>`;
+                    
+                    // Personal Mods para Profunda
+                    if (archimideans.deep.personalMods && archimideans.deep.personalMods.length > 0) {
+                        html += '<div style="margin-bottom: 12px; padding: 8px; background: #1a1f3a; border-radius: 4px; border: 1px solid #2a3150;">';
+                        html += '<div style="font-size: 0.7rem; font-weight: 600; margin-bottom: 6px; color: #ffffff;">Modificadores Personales:</div>';
+                        const modsHtml = archimideans.deep.personalMods.map(mod => {
+                            const modName = getTranslation(mod, 'PersonalMod');
+                            const modDesc = getDescription(mod, 'PersonalMod');
+                            if (modDesc) {
+                                return `<span class="modifier-tooltip" style="display: inline-block; margin: 2px 4px; padding: 3px 8px; background: #0f1219; border-radius: 3px; font-size: 0.65rem;">${modName}<span class="tooltip-content">${modDesc}</span></span>`;
+                            }
+                            return `<span style="display: inline-block; margin: 2px 4px; padding: 3px 8px; background: #0f1219; border-radius: 3px; font-size: 0.65rem;">${modName}</span>`;
+                        }).join('');
+                        html += `<div style="display: flex; flex-wrap: wrap;">${modsHtml}</div>`;
+                        html += '</div>';
+                    }
+                    
+                    archimideans.deep.missions.forEach((mission, idx) => {
+                        const missionType = translateMissionType(mission.type);
+                        const variant = mission.variant ? getTranslation(mission.variant, 'Variant', 'Lab') : '';
+                        
+                        html += `<div class="mission-item" style="margin-bottom: 8px; padding: 8px; background: #0f1219; border-radius: 4px; border: 1px solid #2a3150;">`;
+                        html += `<div style="font-size: 0.75rem; font-weight: 600; margin-bottom: 4px;">Misión ${idx + 1}: ${missionType}</div>`;
+                        if (variant) {
+                            const variantDesc = getDescription(mission.variant, 'Variant', 'Lab');
+                            if (variantDesc) {
+                                html += `<div style="font-size: 0.65rem; color: #8b95a5; margin-bottom: 2px;">Variante: <span class="modifier-tooltip">${variant}<span class="tooltip-content">${variantDesc}</span></span></div>`;
+                            } else {
+                                html += `<div style="font-size: 0.65rem; color: #8b95a5; margin-bottom: 2px;">Variante: ${variant}</div>`;
+                            }
+                        }
+                        if (mission.conditions && mission.conditions.length > 0) {
+                            const modifiersHtml = mission.conditions.map(condition => {
+                                const conditionName = getTranslation(condition, 'Condition');
+                                const conditionDesc = getDescription(condition, 'Condition');
+                                if (conditionDesc) {
+                                    return `<span class="modifier-tooltip">${conditionName}<span class="tooltip-content">${conditionDesc}</span></span>`;
+                                }
+                                return conditionName;
+                            }).join(', ');
+                            html += `<div style="font-size: 0.65rem; color: #C55F7E;">Modificadores: ${modifiersHtml}</div>`;
+                        }
+                        html += '</div>';
+                    });
+                    html += '</div>';
+                }
                 
                 // Arquimedea Temporal
                 if (archimideans.temporal) {
                     html += '<div style="background: #151933; border: 1px solid #2a3150; border-radius: 6px; padding: 12px;">';
-                    html += `<div style="font-size: 0.9rem; font-weight: 700; margin-bottom: 10px; color: #EB6F92;">Temporal - ${archimideans.temporal.location}</div>`;
+                    html += `<div style="font-size: 0.9rem; font-weight: 700; margin-bottom: 10px; color: #EB6F92;">Arquimedea temporal - ${archimideans.temporal.location}</div>`;
                     
                     // Personal Mods
                     if (archimideans.temporal.personalMods && archimideans.temporal.personalMods.length > 0) {
@@ -1402,8 +1458,8 @@
                     html += '</div>';
                 }
                 
-                // Arquimedea Profunda
-                if (archimideans.deep) {
+                // Arquimedea Profunda (solo en view normal, no exclusiva)
+                if (!isArquimideasView && archimideans.deep) {
                     html += '<div style="background: #151933; border: 1px solid #2a3150; border-radius: 6px; padding: 12px;">';
                     html += `<div style="font-size: 0.9rem; font-weight: 700; margin-bottom: 10px; color: #EB6F92;">Profunda - ${archimideans.deep.location}</div>`;
                     
@@ -1453,7 +1509,9 @@
                     html += '</div>';
                 }
                 
-                html += '</div></div>';
+                html += '</div>'; // fin gridStyle
+                if (isArquimideasView) html += '</div>'; // fin containerStyle
+                html += '</div>'; // fin container principal
             }
             
             document.getElementById('archimidean-content').innerHTML = html;
@@ -1463,11 +1521,105 @@
         function renderSidebar() {
             const cycles = gameData.cycles || {};
             const invasions = gameData.invasions || [];
+            const sortie = gameData.sortie;
+            const archonHunt = gameData.archonHunt;
             
             // Filtrar según VIEW_FILTER
             const showCiclos = !window.VIEW_FILTER || window.VIEW_FILTER === 'ciclos' || window.VIEW_FILTER === 'ciclos_invasiones';
             const showInvasiones = !window.VIEW_FILTER || window.VIEW_FILTER === 'invasiones' || window.VIEW_FILTER === 'ciclos_invasiones';
             const horizontalTimers = window.VIEW_FILTER === 'ciclos_invasiones';
+            const isCombinedView = window.VIEW_FILTER === 'ciclos_invasiones';
+            
+            // Vista especial: Grid 2x2 con Sortie y Archon al lado
+            if (isCombinedView) {
+                let gridHtml = '<div style="display: grid; grid-template-columns: minmax(300px, 1fr) minmax(300px, 1fr); gap: 15px; max-width: 1400px; margin: 0 auto;">';
+                
+                // Fila 1: Ciclos (izquierda) + Sortie (derecha)
+                gridHtml += '<div class="sidebar-section">';
+                gridHtml += '<div class="sidebar-header" style="color: #EB6F92;">Ciclos</div>';
+                
+                // Cetus
+                if (cycles.cetus) {
+                    const cetusIcon = cycles.cetus.isDay ? '☀️' : '🌙';
+                    const cetusState = cycles.cetus.isDay ? 'Día' : 'Noche';
+                    gridHtml += `<div class="sidebar-item" style="display: flex; justify-content: space-between; align-items: center;"><div>${cetusIcon} <strong>Cetus:</strong> ${cetusState}</div><div class="timer" data-expiry="${cycles.cetus.expiry}">${formatTime(getTimeRemaining(cycles.cetus.expiry))}</div></div>`;
+                }
+                // Orb Vallis
+                if (cycles.vallis) {
+                    const vallisIcon = cycles.vallis.isWarm ? '☀️' : '❄️';
+                    const vallisState = cycles.vallis.isWarm ? 'Cálido' : 'Frío';
+                    gridHtml += `<div class="sidebar-item" style="display: flex; justify-content: space-between; align-items: center;"><div>${vallisIcon} <strong>Orb Vallis:</strong> ${vallisState}</div><div class="timer" data-expiry="${cycles.vallis.expiry}">${formatTime(getTimeRemaining(cycles.vallis.expiry))}</div></div>`;
+                }
+                // Cambion
+                if (cycles.cambion) {
+                    const cambionIcon = cycles.cambion.active === 'fass' ? '🔴' : '🔵';
+                    const cambionState = cycles.cambion.active === 'fass' ? 'Fass' : 'Vome';
+                    gridHtml += `<div class="sidebar-item" style="display: flex; justify-content: space-between; align-items: center;"><div>${cambionIcon} <strong>Cambion:</strong> ${cambionState}</div><div class="timer" data-expiry="${cycles.cambion.expiry}">${formatTime(getTimeRemaining(cycles.cambion.expiry))}</div></div>`;
+                }
+                // Zariman
+                if (cycles.zariman) {
+                    const zarimanIcon = cycles.zariman.state === 'Grineer' ? '🔴' : '🔵';
+                    gridHtml += `<div class="sidebar-item" style="display: flex; justify-content: space-between; align-items: center;"><div>${zarimanIcon} <strong>Zariman:</strong> ${cycles.zariman.state}</div><div class="timer" data-expiry="${cycles.zariman.expiry}">${formatTime(getTimeRemaining(cycles.zariman.expiry))}</div></div>`;
+                }
+                // Duviri
+                if (cycles.duviri) {
+                    const duvirIcon = cycles.duviri.icon || '';
+                    gridHtml += `<div class="sidebar-item" style="display: flex; justify-content: space-between; align-items: center;"><div>${duvirIcon} <strong>Duviri:</strong> ${cycles.duviri.state}</div><div class="timer" data-expiry="${cycles.duviri.expiry}">${formatTime(getTimeRemaining(cycles.duviri.expiry))}</div></div>`;
+                }
+                gridHtml += '</div>';
+                
+                // Sortie (derecha, fila 1)
+                gridHtml += '<div class="sidebar-section">';
+                if (sortie) {
+                    const remaining = getTimeRemaining(sortie.expiry);
+                    gridHtml += `<div style="font-size: 0.85rem; font-weight: 700; margin-bottom: 10px; color: #EB6F92; text-align: center; padding-bottom: 8px; border-bottom: 1px solid #2a3150;">Sortie - ${sortie.boss}</div>`;
+                    gridHtml += `<div style="font-size: 0.7rem; color: #8b95a5; text-align: center; margin-bottom: 10px;">Rota en: <span class="timer" data-expiry="${sortie.expiry}">${formatTime(remaining)}</span></div>`;
+                    sortie.missions.forEach(mission => {
+                        gridHtml += `<div class="mission-item" style="margin-bottom: 8px; padding: 10px 12px; background: #151933; border-radius: 4px; border: 1px solid #2a3150;">`;
+                        gridHtml += `<div style="font-size: 0.75rem; font-weight: 600; margin-bottom: 3px;">${mission.index}. ${mission.missionType}</div>`;
+                        gridHtml += `<div style="font-size: 0.65rem; color: #8b95a5; margin-bottom: 2px;">${mission.node} - ${mission.enemy}</div>`;
+                        gridHtml += `<div style="font-size: 0.65rem; color: #C55F7E;">${mission.modifier}</div>`;
+                        gridHtml += `</div>`;
+                    });
+                }
+                gridHtml += '</div>';
+                
+                // Fila 2: Invasiones (izquierda) + Archon Hunt (derecha)
+                gridHtml += '<div class="sidebar-section">';
+                gridHtml += '<div class="sidebar-header" style="color: #EB6F92;">Invasiones</div>';
+                if (invasions.length > 0) {
+                    invasions.forEach(inv => {
+                        gridHtml += `<div class="sidebar-item"><div style="font-weight: 600; margin-bottom: 4px;">${inv.node}</div>`;
+                        gridHtml += `<div style="font-size: 0.65rem; color: #8b95a5; margin-bottom: 2px;">${inv.missions.join(', ')}</div>`;
+                        gridHtml += `<div style="font-size: 0.65rem; margin-bottom: 3px;">🔴 ${inv.attacker}: ${inv.reward1}</div>`;
+                        gridHtml += inv.reward2 ? `<div style="font-size: 0.65rem;">🔵 ${inv.defender}: ${inv.reward2}</div>` : `<div style="font-size: 0.65rem; color: #666;">🔵 ${inv.defender}: Sin recompensa</div>`;
+                        gridHtml += '</div>';
+                    });
+                } else {
+                    gridHtml += '<div class="sidebar-item">No hay invasiones activas</div>';
+                }
+                gridHtml += '</div>';
+                
+                // Archon Hunt (derecha, fila 2)
+                gridHtml += '<div class="sidebar-section">';
+                if (archonHunt) {
+                    const remaining = getTimeRemaining(archonHunt.expiry);
+                    gridHtml += `<div style="font-size: 0.85rem; font-weight: 700; margin-bottom: 8px; color: #EB6F92; text-align: center; padding-bottom: 8px; border-bottom: 1px solid #2a3150;">${archonHunt.boss}</div>`;
+                    gridHtml += `<div style="font-size: 0.65rem; color: #C55F7E; text-align: center; margin-bottom: 8px;">${archonHunt.crystal}</div>`;
+                    gridHtml += `<div style="font-size: 0.7rem; color: #8b95a5; text-align: center; margin-bottom: 10px;">Rota en: <span class="timer" data-expiry="${archonHunt.expiry}">${formatTime(remaining)}</span></div>`;
+                    archonHunt.missions.forEach(mission => {
+                        gridHtml += `<div class="mission-item" style="margin-bottom: 8px; padding: 10px 12px; background: #151933; border-radius: 4px; border: 1px solid #2a3150;">`;
+                        gridHtml += `<div style="font-size: 0.75rem; font-weight: 600; margin-bottom: 3px;">${mission.index}. ${mission.missionType}</div>`;
+                        gridHtml += `<div style="font-size: 0.65rem; color: #8b95a5;">${mission.node} - ${mission.enemy}</div>`;
+                        gridHtml += `</div>`;
+                    });
+                }
+                gridHtml += '</div>';
+                
+                gridHtml += '</div>'; // fin grid 2x2
+                document.getElementById('sidebar').innerHTML = gridHtml;
+                return;
+            }
             
             let html = '';
             
@@ -1593,7 +1745,7 @@
                     `;
                 }
             } else {
-                html += `<div class="sidebar-item">🌊 <strong>Duviri:</strong> No disponible</div>`;
+                html += `<div class="sidebar-item"><strong>Duviri:</strong> No disponible</div>`;
             }
             
                 html += '</div>'; // fin sidebar-section ciclos
@@ -1702,11 +1854,12 @@
                     break;
                     
                 case 'ciclos_invasiones':
-                    // Vista combinada: ciclos arriba, invasiones abajo, timers horizontales
+                    // Vista combinada: grid 2x2 (ciclos+sortie | invasiones+archon)
                     if (mainLayout) {
                         const fissuresContent = mainLayout.querySelector('#fissures-content');
                         if (fissuresContent) fissuresContent.style.display = 'none';
                     }
+                    // missions-content se oculta porque Sortie/Archon se renderizan en sidebar
                     if (missionsContent) missionsContent.style.display = 'none';
                     if (archimideanContent) archimideanContent.style.display = 'none';
                     window.VIEW_FILTER = 'ciclos_invasiones';
@@ -1727,9 +1880,10 @@
                     break;
                     
                 case 'arquimedeas':
-                    // Solo Arquímedeas
+                    // Solo Arquímedeas en vertical
                     if (mainLayout) mainLayout.style.display = 'none';
                     if (missionsContent) missionsContent.style.display = 'none';
+                    window.VIEW_FILTER = 'arquimedeas';
                     break;
                     
                 case 'incarnon':
