@@ -23,7 +23,7 @@
             line-height: 1.6;
         }
 
-        /* Contenedor principal */
+        /* Contenedor principal centrado */
         .container {
             max-width: 1400px;
             margin: 0 auto;
@@ -36,7 +36,7 @@
             padding-bottom: 20px;
         }
 
-        /* Título principal con degradado Rosa */
+        /* Título principal con degradado Rose Pine */
         h1 {
             font-size: 2.5rem;
             margin-bottom: 10px;
@@ -112,7 +112,7 @@
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
         }
 
-        /* Cada columna de fisuras */
+        /* Cada columna de fisuras - ULTRA COMPACTA */
         .fissure-column {
             background: #0f1219;
             padding: 8px;
@@ -120,7 +120,7 @@
             border: 1px solid #1a1f3a;
         }
 
-        /* Encabezado de cada columna */
+        /* Encabezado de cada columna - ULTRA PEQUEÑO */
         .column-header {
             font-size: 0.85rem;
             font-weight: 700;
@@ -130,12 +130,12 @@
             text-align: center;
         }
 
-        /* Grupo de fisuras por tier (Lith, Meso, Neo, etc) */
+        /* Grupo de fisuras por tier (Lith, Meso, Neo, etc) - ULTRA COMPACTO */
         .tier-group {
             margin-bottom: 6px;
         }
 
-        /* Título de cada tier */
+        /* Título de cada tier - ULTRA PEQUEÑO */
         .tier-title {
             font-size: 0.65rem;
             font-weight: 600;
@@ -150,7 +150,7 @@
             margin-top: 0;
         }
 
-        /* Card individual para cada fisura  */
+        /* Card individual para cada fisura - ULTRA COMPACTA */
         .card {
             background: #151933;
             border: 1px solid #2a3150;
@@ -196,7 +196,7 @@
             text-overflow: ellipsis;
         }
 
-        /* Timer de cuenta regresiva */
+        /* Timer de cuenta regresiva - ULTRA COMPACTO */
         .timer {
             font-size: 0.75rem;
             font-weight: 700;
@@ -218,7 +218,7 @@
             50% { opacity: 0.6; }
         }
 
-        /* Etiqueta de información (enemigo, facción, etc) */
+        /* Etiqueta de información (enemigo, facción, etc) - OCULTA EN COMPACTO */
         .info-tag {
             display: none;
         }
@@ -545,6 +545,7 @@
             'Deimos': 'Deimos',
             'Zariman': 'Zariman',
             'Duviri': 'Duviri',
+            'Kuva Fortress': 'Fortaleza Kuva',
             'Unknown': 'Desconocido'
         };
 
@@ -708,8 +709,7 @@
                             html += `
                                 <div class="card" data-fissure-id="${fissure.id}">
                                     <div class="card-info">
-                                        <div class="card-title">${fissure.missionType}</div>
-                                        <div class="card-subtitle">${fissure.node} - ${fissure.enemy}</div>
+                                        <div class="card-title">${fissure.missionType} <span class="card-subtitle">${fissure.node} - ${fissure.enemy}</span></div>
                                     </div>
                                     <div class="${timerClass}" data-expiry="${fissure.expiry}">
                                         ${formatTime(remaining)}
@@ -755,8 +755,7 @@
                             html += `
                                 <div class="card" data-fissure-id="${fissure.id}">
                                     <div class="card-info">
-                                        <div class="card-title">${fissure.missionType}</div>
-                                        <div class="card-subtitle">${fissure.node} - ${fissure.enemy}</div>
+                                        <div class="card-title">${fissure.missionType} <span class="card-subtitle">${fissure.node} - ${fissure.enemy}</span></div>
                                     </div>
                                     <div class="${timerClass}" data-expiry="${fissure.expiry}">
                                         ${formatTime(remaining)}
@@ -1466,8 +1465,9 @@
             const invasions = gameData.invasions || [];
             
             // Filtrar según VIEW_FILTER
-            const showCiclos = !window.VIEW_FILTER || window.VIEW_FILTER === 'ciclos';
-            const showInvasiones = !window.VIEW_FILTER || window.VIEW_FILTER === 'invasiones';
+            const showCiclos = !window.VIEW_FILTER || window.VIEW_FILTER === 'ciclos' || window.VIEW_FILTER === 'ciclos_invasiones';
+            const showInvasiones = !window.VIEW_FILTER || window.VIEW_FILTER === 'invasiones' || window.VIEW_FILTER === 'ciclos_invasiones';
+            const horizontalTimers = window.VIEW_FILTER === 'ciclos_invasiones';
             
             let html = '';
             
@@ -1486,12 +1486,21 @@
             if (cycles.cetus) {
                 const cetusIcon = cycles.cetus.isDay ? '☀️' : '🌙';
                 const cetusState = cycles.cetus.isDay ? 'Día' : 'Noche';
-                html += `
-                    <div class="sidebar-item">
-                        ${cetusIcon} <strong>Cetus:</strong> ${cetusState}
-                        <div class="timer" data-expiry="${cycles.cetus.expiry}">${formatTime(getTimeRemaining(cycles.cetus.expiry))}</div>
-                    </div>
-                `;
+                if (horizontalTimers) {
+                    html += `
+                        <div class="sidebar-item" style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>${cetusIcon} <strong>Cetus:</strong> ${cetusState}</div>
+                            <div class="timer" data-expiry="${cycles.cetus.expiry}">${formatTime(getTimeRemaining(cycles.cetus.expiry))}</div>
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="sidebar-item">
+                            ${cetusIcon} <strong>Cetus:</strong> ${cetusState}
+                            <div class="timer" data-expiry="${cycles.cetus.expiry}">${formatTime(getTimeRemaining(cycles.cetus.expiry))}</div>
+                        </div>
+                    `;
+                }
             } else {
                 html += `<div class="sidebar-item"><strong>Cetus:</strong> No disponible</div>`;
             }
@@ -1500,35 +1509,62 @@
             if (cycles.vallis) {
                 const vallisIcon = cycles.vallis.isWarm ? '☀️' : '❄️';
                 const vallisState = cycles.vallis.isWarm ? 'Cálido' : 'Frío';
-                html += `
-                    <div class="sidebar-item">
-                        ${vallisIcon} <strong>Orb Vallis:</strong> ${vallisState}
-                        <div class="timer" data-expiry="${cycles.vallis.expiry}">${formatTime(getTimeRemaining(cycles.vallis.expiry))}</div>
-                    </div>
-                `;
+                if (horizontalTimers) {
+                    html += `
+                        <div class="sidebar-item" style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>${vallisIcon} <strong>Orb Vallis:</strong> ${vallisState}</div>
+                            <div class="timer" data-expiry="${cycles.vallis.expiry}">${formatTime(getTimeRemaining(cycles.vallis.expiry))}</div>
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="sidebar-item">
+                            ${vallisIcon} <strong>Orb Vallis:</strong> ${vallisState}
+                            <div class="timer" data-expiry="${cycles.vallis.expiry}">${formatTime(getTimeRemaining(cycles.vallis.expiry))}</div>
+                        </div>
+                    `;
+                }
             }
             
             // Cambion Drift
             if (cycles.cambion) {
                 const cambionIcon = cycles.cambion.active === 'fass' ? '🔴' : '🔵';
                 const cambionState = cycles.cambion.active === 'fass' ? 'Fass' : 'Vome';
-                html += `
-                    <div class="sidebar-item">
-                        ${cambionIcon} <strong>Cambion:</strong> ${cambionState}
-                        <div class="timer" data-expiry="${cycles.cambion.expiry}">${formatTime(getTimeRemaining(cycles.cambion.expiry))}</div>
-                    </div>
-                `;
+                if (horizontalTimers) {
+                    html += `
+                        <div class="sidebar-item" style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>${cambionIcon} <strong>Cambion:</strong> ${cambionState}</div>
+                            <div class="timer" data-expiry="${cycles.cambion.expiry}">${formatTime(getTimeRemaining(cycles.cambion.expiry))}</div>
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="sidebar-item">
+                            ${cambionIcon} <strong>Cambion:</strong> ${cambionState}
+                            <div class="timer" data-expiry="${cycles.cambion.expiry}">${formatTime(getTimeRemaining(cycles.cambion.expiry))}</div>
+                        </div>
+                    `;
+                }
             }
             
             // Zariman
             if (cycles.zariman) {
                 const zarimanIcon = cycles.zariman.state === 'Grineer' ? '🔴' : '🔵';
-                html += `
-                    <div class="sidebar-item">
-                        ${zarimanIcon} <strong>Zariman:</strong> ${cycles.zariman.state}
-                        <div class="timer" data-expiry="${cycles.zariman.expiry}">${formatTime(getTimeRemaining(cycles.zariman.expiry))}</div>
-                    </div>
-                `;
+                if (horizontalTimers) {
+                    html += `
+                        <div class="sidebar-item" style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>${zarimanIcon} <strong>Zariman:</strong> ${cycles.zariman.state}</div>
+                            <div class="timer" data-expiry="${cycles.zariman.expiry}">${formatTime(getTimeRemaining(cycles.zariman.expiry))}</div>
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="sidebar-item">
+                            ${zarimanIcon} <strong>Zariman:</strong> ${cycles.zariman.state}
+                            <div class="timer" data-expiry="${cycles.zariman.expiry}">${formatTime(getTimeRemaining(cycles.zariman.expiry))}</div>
+                        </div>
+                    `;
+                }
             }
             
             // Duviri
@@ -1541,12 +1577,21 @@
                     'Fear': ''
                 };
                 const duviriIcon = duviriIcons[cycles.duviri.state] || '';
-                html += `
-                    <div class="sidebar-item">
-                        ${duviriIcon} <strong>Duviri:</strong> ${cycles.duviri.state}
-                        <div class="timer" data-expiry="${cycles.duviri.expiry}">${formatTime(getTimeRemaining(cycles.duviri.expiry))}</div>
-                    </div>
-                `;
+                if (horizontalTimers) {
+                    html += `
+                        <div class="sidebar-item" style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>${duviriIcon} <strong>Duviri:</strong> ${cycles.duviri.state}</div>
+                            <div class="timer" data-expiry="${cycles.duviri.expiry}">${formatTime(getTimeRemaining(cycles.duviri.expiry))}</div>
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="sidebar-item">
+                            ${duviriIcon} <strong>Duviri:</strong> ${cycles.duviri.state}
+                            <div class="timer" data-expiry="${cycles.duviri.expiry}">${formatTime(getTimeRemaining(cycles.duviri.expiry))}</div>
+                        </div>
+                    `;
+                }
             } else {
                 html += `<div class="sidebar-item">🌊 <strong>Duviri:</strong> No disponible</div>`;
             }
@@ -1654,6 +1699,17 @@
                     if (missionsContent) missionsContent.style.display = 'none';
                     if (archimideanContent) archimideanContent.style.display = 'none';
                     window.VIEW_FILTER = 'invasiones';
+                    break;
+                    
+                case 'ciclos_invasiones':
+                    // Vista combinada: ciclos arriba, invasiones abajo, timers horizontales
+                    if (mainLayout) {
+                        const fissuresContent = mainLayout.querySelector('#fissures-content');
+                        if (fissuresContent) fissuresContent.style.display = 'none';
+                    }
+                    if (missionsContent) missionsContent.style.display = 'none';
+                    if (archimideanContent) archimideanContent.style.display = 'none';
+                    window.VIEW_FILTER = 'ciclos_invasiones';
                     break;
                     
                 case 'sortie':
