@@ -23,7 +23,7 @@
             line-height: 1.6;
         }
 
-        /* Contenedor principal centrado */
+        /* Contenedor principal */
         .container {
             max-width: 1400px;
             margin: 0 auto;
@@ -36,7 +36,7 @@
             padding-bottom: 20px;
         }
 
-        /* Título principal con degradado Rose Pine */
+        /* Título principal con degradado Rosa */
         h1 {
             font-size: 2.5rem;
             margin-bottom: 10px;
@@ -89,6 +89,9 @@
             grid-template-columns: 1fr 1fr;
             gap: 12px;
             margin-top: 15px;
+            max-width: 800px; /* Limitar ancho máximo */
+            margin-left: auto;
+            margin-right: 0px;
         }
         
         .mission-box {
@@ -109,7 +112,7 @@
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
         }
 
-        /* Cada columna de fisuras - ULTRA COMPACTA */
+        /* Cada columna de fisuras */
         .fissure-column {
             background: #0f1219;
             padding: 8px;
@@ -117,7 +120,7 @@
             border: 1px solid #1a1f3a;
         }
 
-        /* Encabezado de cada columna - ULTRA PEQUEÑO */
+        /* Encabezado de cada columna */
         .column-header {
             font-size: 0.85rem;
             font-weight: 700;
@@ -127,12 +130,12 @@
             text-align: center;
         }
 
-        /* Grupo de fisuras por tier (Lith, Meso, Neo, etc) - ULTRA COMPACTO */
+        /* Grupo de fisuras por tier (Lith, Meso, Neo, etc) */
         .tier-group {
             margin-bottom: 6px;
         }
 
-        /* Título de cada tier - ULTRA PEQUEÑO */
+        /* Título de cada tier */
         .tier-title {
             font-size: 0.65rem;
             font-weight: 600;
@@ -147,7 +150,7 @@
             margin-top: 0;
         }
 
-        /* Card individual para cada fisura - ULTRA COMPACTA */
+        /* Card individual para cada fisura  */
         .card {
             background: #151933;
             border: 1px solid #2a3150;
@@ -193,7 +196,7 @@
             text-overflow: ellipsis;
         }
 
-        /* Timer de cuenta regresiva - ULTRA COMPACTO */
+        /* Timer de cuenta regresiva */
         .timer {
             font-size: 0.75rem;
             font-weight: 700;
@@ -215,7 +218,7 @@
             50% { opacity: 0.6; }
         }
 
-        /* Etiqueta de información (enemigo, facción, etc) - OCULTA EN COMPACTO */
+        /* Etiqueta de información (enemigo, facción, etc) */
         .info-tag {
             display: none;
         }
@@ -423,6 +426,9 @@
         <!-- Sección inferior: Arquimedeas -->
         <div id="archimidean-content"></div>
         
+        <!-- Sección: Rotaciones exclusivas (solo con ?view=) -->
+        <div id="rotations-content"></div>
+        
         <!-- Footer con timestamp de última actualización -->
         <footer>
             Última actualización: <span id="lastUpdate">Cargando...</span>
@@ -443,6 +449,68 @@
         let gameData = {fissures: [], cycles: {}, invasions: [], archimideans: {temporal: null, deep: null}, sortie: null, archonHunt: null}; // Almacena todos los datos del juego
         let lastFissureIds = new Set(); // Para detectar nuevas fisuras
         let SORTIE_DATA = {}; // Datos de modificadores y bosses de Sortie
+        
+        /* ===== ROTACIONES SEMANALES (HARDCODED) ===== */
+        
+        // Rotación de Armas Incarnon (8 semanas, reset con Archon Hunt)
+        const INCARNON_ROTATION = [
+            {week: 1, weapons: ['Braton', 'Lato', 'Skana', 'Paris', 'Kunai']},
+            {week: 2, weapons: ['Boar', 'Gammacor', 'Angstrum', 'Gorgon', 'Anku']},
+            {week: 3, weapons: ['Bo', 'Latron', 'Furis', 'Furax', 'Strun']},
+            {week: 4, weapons: ['Lex', 'Magistar', 'Boltor', 'Bronco', 'Daga Cerámica']},
+            {week: 5, weapons: ['Torid', 'Toxocyst Dobles', 'Ichor Dobles', 'Miter', 'Atomos']},
+            {week: 6, weapons: ['Ack & Brunt', 'Soma', 'Vasto', 'Nami Solo', 'Burston']},
+            {week: 7, weapons: ['Zylok', 'Sibear', 'Dread', 'Despair', 'Hate']},
+            {week: 8, weapons: ['Dera', 'Sybaris', 'Cestra', 'Sicarus', 'Okina']}
+        ];
+        
+        // Rotación de Warframes en Circuito (11 semanas, reset con Archon Hunt)
+        const CIRCUIT_ROTATION = [
+            {week: 1, frames: ['Excalibur', 'Trinity', 'Ember']},
+            {week: 2, frames: ['Loki', 'Mag', 'Rhino']},
+            {week: 3, frames: ['Ash', 'Frost', 'Nyx']},
+            {week: 4, frames: ['Saryn', 'Vauban', 'Nova']},
+            {week: 5, frames: ['Nekros', 'Valkyr', 'Oberon']},
+            {week: 6, frames: ['Hydroid', 'Mirage', 'Limbo']},
+            {week: 7, frames: ['Mesa', 'Chroma', 'Atlas']},
+            {week: 8, frames: ['Ivara', 'Inaros', 'Titania']},
+            {week: 9, frames: ['Nidus', 'Octavia', 'Harrow']},
+            {week: 10, frames: ['Gara', 'Khora', 'Revenant']},
+            {week: 11, frames: ['Garuda', 'Baruuk', 'Hildryn']}
+        ];
+        
+        // Rotación de Tienda de Teshin (8 semanas, reset con Archon Hunt)
+        const TESHIN_ROTATION = [
+            {week: 1, items: [{name: 'Forma Umbra', cost: '150 Esencias'}]},
+            {week: 2, items: [{name: '50.000 Kuva', cost: '55 Esencias'}]},
+            {week: 3, items: [{name: 'Riven de Kitgun', cost: '75 Esencias'}]},
+            {week: 4, items: [{name: 'Paquete de formas', cost: '75 Esencias'}]},
+            {week: 5, items: [{name: 'Riven de Zaw', cost: '75 Esencias'}]},
+            {week: 6, items: [{name: '30.000 de Endo', cost: '150 Esencias'}]},
+            {week: 7, items: [{name: 'Riven de Rifle', cost: '75 Esencias'}]},
+            {week: 8, items: [{name: 'Riven de Escopeta', cost: '75 Esencias'}]}
+        ];
+        
+        // Calcular semana actual automáticamente (reset lunes 00:00 UTC)
+        // EPOCHS CALIBRADOS PARA: Incarnon semana 5, Circuito semana 5, Teshin semana 1
+        function getCurrentWeek(totalWeeks, rotationType) {
+            const now = Date.now();
+            
+            // Epochs específicos por tipo de rotación (calibrados 9 dic 2025)
+            let mondayEpoch;
+            if (rotationType === 'incarnon') {
+                mondayEpoch = 1699833600000; // Para que hoy sea semana 5 de 8
+            } else if (rotationType === 'circuit') {
+                mondayEpoch = 1702857600000; // Para que hoy sea semana 5 de 11
+            } else if (rotationType === 'teshin') {
+                mondayEpoch = 1702252800000; // Para que hoy sea semana 1 de 8
+            } else {
+                mondayEpoch = new Date('2024-01-01T00:00:00Z').getTime();
+            }
+            
+            const weeksSinceEpoch = Math.floor((now - mondayEpoch) / (7 * 24 * 60 * 60 * 1000));
+            return (weeksSinceEpoch % totalWeeks) + 1;
+        }
         
         /* ===== MAPEOS DE DATOS ===== */
         
@@ -713,16 +781,20 @@
             const sortie = gameData.sortie;
             const archonHunt = gameData.archonHunt;
             
-            if (!sortie && !archonHunt) return '';
+            // Filtrar según VIEW_FILTER
+            const showSortie = !window.VIEW_FILTER || window.VIEW_FILTER === 'sortie';
+            const showArchon = !window.VIEW_FILTER || window.VIEW_FILTER === 'archon';
+            
+            if ((!sortie || !showSortie) && (!archonHunt || !showArchon)) return '';
             
             let html = '<div class="missions-container">';
             
             // Sortie
-            if (sortie) {
+            if (sortie && showSortie) {
                 const remaining = getTimeRemaining(sortie.expiry);
                 html += '<div class="mission-box">';
                 html += `<div style="font-size: 0.85rem; font-weight: 700; margin-bottom: 10px; color: #EB6F92; text-align: center; padding-bottom: 8px; border-bottom: 1px solid #2a3150;">Sortie - ${sortie.boss}</div>`;
-                html += `<div style="font-size: 0.7rem; color: #8b95a5; text-align: center; margin-bottom: 10px;">Expira en: <span class="timer" data-expiry="${sortie.expiry}">${formatTime(remaining)}</span></div>`;
+                html += `<div style="font-size: 0.7rem; color: #8b95a5; text-align: center; margin-bottom: 10px;">Rota en: <span class="timer" data-expiry="${sortie.expiry}">${formatTime(remaining)}</span></div>`;
                 
                 sortie.missions.forEach(mission => {
                     html += `<div class="mission-item" style="margin-bottom: 8px; padding: 8px; background: #151933; border-radius: 4px; border: 1px solid #2a3150;">`;
@@ -736,12 +808,12 @@
             }
             
             // Archon Hunt
-            if (archonHunt) {
+            if (archonHunt && showArchon) {
                 const remaining = getTimeRemaining(archonHunt.expiry);
                 html += '<div class="mission-box">';
                 html += `<div style="font-size: 0.85rem; font-weight: 700; margin-bottom: 8px; color: #EB6F92; text-align: center; padding-bottom: 8px; border-bottom: 1px solid #2a3150;">${archonHunt.boss}</div>`;
                 html += `<div style="font-size: 0.65rem; color: #C55F7E; text-align: center; margin-bottom: 8px;">${archonHunt.crystal}</div>`;
-                html += `<div style="font-size: 0.7rem; color: #8b95a5; text-align: center; margin-bottom: 10px;">Expira en: <span class="timer" data-expiry="${archonHunt.expiry}">${formatTime(remaining)}</span></div>`;
+                html += `<div style="font-size: 0.7rem; color: #8b95a5; text-align: center; margin-bottom: 10px;">Rota en: <span class="timer" data-expiry="${archonHunt.expiry}">${formatTime(remaining)}</span></div>`;
                 
                 archonHunt.missions.forEach(mission => {
                     html += `<div class="mission-item" style="margin-bottom: 8px; padding: 8px; background: #151933; border-radius: 4px; border: 1px solid #2a3150;">`;
@@ -1393,8 +1465,22 @@
             const cycles = gameData.cycles || {};
             const invasions = gameData.invasions || [];
             
-            let html = '<div class="sidebar-section">';
-            html += '<div class="sidebar-header" style="color: #EB6F92;">Ciclos</div>';
+            // Filtrar según VIEW_FILTER
+            const showCiclos = !window.VIEW_FILTER || window.VIEW_FILTER === 'ciclos';
+            const showInvasiones = !window.VIEW_FILTER || window.VIEW_FILTER === 'invasiones';
+            
+            let html = '';
+            
+            if (showCiclos) {
+                html += '<div class="sidebar-section">';
+                html += '<div class="sidebar-header" style="color: #EB6F92;">Ciclos</div>';
+            }
+            
+            if (!showCiclos && !showInvasiones) {
+                return; // No renderizar nada si no corresponde
+            }
+            
+            if (showCiclos) {
             
             // Cetus
             if (cycles.cetus) {
@@ -1407,7 +1493,7 @@
                     </div>
                 `;
             } else {
-                html += `<div class="sidebar-item">🏜️ <strong>Cetus:</strong> No disponible</div>`;
+                html += `<div class="sidebar-item"><strong>Cetus:</strong> No disponible</div>`;
             }
             
             // Orb Vallis
@@ -1465,38 +1551,294 @@
                 html += `<div class="sidebar-item">🌊 <strong>Duviri:</strong> No disponible</div>`;
             }
             
-            html += '</div>'; // fin sidebar-section ciclos
-            
-            // Invasiones
-            html += '<div class="sidebar-section">';
-            html += '<div style="color: #EB6F92;" class="sidebar-header">Invasiones</div>';
-            
-            if (invasions.length > 0) {
-                invasions.forEach(inv => {
-                    html += `
-                        <div class="sidebar-item">
-                            <div style="font-weight: 600; margin-bottom: 4px;">${inv.node}</div>
-                            <div style="font-size: 0.65rem; color: #8b95a5; margin-bottom: 2px;">
-                                ${inv.missions.join(', ')}
-                            </div>
-                            <div style="font-size: 0.65rem; margin-bottom: 3px;">
-                                🔴 ${inv.attacker}: ${inv.reward1}
-                            </div>
-                            ${inv.reward2 ? `<div style="font-size: 0.65rem;">
-                                🔵 ${inv.defender}: ${inv.reward2}
-                            </div>` : `<div style="font-size: 0.65rem; color: #666;">
-                                🔵 ${inv.defender}: Sin recompensa
-                            </div>`}
-                        </div>
-                    `;
-                });
-            } else {
-                html += '<div class="sidebar-item">No hay invasiones activas</div>';
+                html += '</div>'; // fin sidebar-section ciclos
             }
             
-            html += '</div>'; // fin sidebar-section invasiones
+            // Invasiones
+            if (showInvasiones) {
+                html += '<div class="sidebar-section">';
+                html += '<div style="color: #EB6F92;" class="sidebar-header">Invasiones</div>';
+            }
+            
+            if (showInvasiones) {
+            
+                if (invasions.length > 0) {
+                    invasions.forEach(inv => {
+                        html += `
+                            <div class="sidebar-item">
+                                <div style="font-weight: 600; margin-bottom: 4px;">${inv.node}</div>
+                                <div style="font-size: 0.65rem; color: #8b95a5; margin-bottom: 2px;">
+                                    ${inv.missions.join(', ')}
+                                </div>
+                                <div style="font-size: 0.65rem; margin-bottom: 3px;">
+                                    🔴 ${inv.attacker}: ${inv.reward1}
+                                </div>
+                                ${inv.reward2 ? `<div style="font-size: 0.65rem;">
+                                    🔵 ${inv.defender}: ${inv.reward2}
+                                </div>` : `<div style="font-size: 0.65rem; color: #666;">
+                                    🔵 ${inv.defender}: Sin recompensa
+                                </div>`}
+                            </div>
+                        `;
+                    });
+                } else {
+                    html += '<div class="sidebar-item">No hay invasiones activas</div>';
+                }
+                
+                html += '</div>'; // fin sidebar-section invasiones
+            }
             
             document.getElementById('sidebar').innerHTML = html;
+        }
+        
+        /* ===== ROUTING: VISTAS ESPECÍFICAS ===== */
+        
+        // Obtener el parámetro 'view' de la URL
+        function getViewMode() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('view'); // null si no hay parámetro
+        }
+        
+        // Ocultar/mostrar secciones según la vista
+        function applyViewMode() {
+            const view = getViewMode();
+            
+            if (!view) {
+                // Vista completa (por defecto) - mostrar todo
+                return;
+            }
+            
+            // Ocultar todo primero
+            const header = document.querySelector('header');
+            const separator = document.querySelector('.separator');
+            const mainLayout = document.querySelector('.main-layout');
+            const missionsContent = document.getElementById('missions-content');
+            const archimideanContent = document.getElementById('archimidean-content');
+            const footer = document.querySelector('footer');
+            
+            // Ocultar elementos por defecto
+            if (header) header.style.display = 'none';
+            if (separator) separator.style.display = 'none';
+            if (footer) footer.style.display = 'none';
+            
+            // Mostrar solo la sección pedida con el link
+            switch(view) {
+                case 'fisuras':
+                    // Solo fisuras (lado derecho del main-layout)
+                    if (mainLayout) {
+                        const sidebar = mainLayout.querySelector('.sidebar');
+                        if (sidebar) sidebar.style.display = 'none';
+                    }
+                    if (missionsContent) missionsContent.style.display = 'none';
+                    if (archimideanContent) archimideanContent.style.display = 'none';
+                    break;
+                    
+                case 'ciclos':
+                    // Solo ciclos (sidebar, sin invasiones)
+                    if (mainLayout) {
+                        const fissuresContent = mainLayout.querySelector('#fissures-content');
+                        if (fissuresContent) fissuresContent.style.display = 'none';
+                    }
+                    if (missionsContent) missionsContent.style.display = 'none';
+                    if (archimideanContent) archimideanContent.style.display = 'none';
+                    // Necesitamos filtrar invasiones en renderSidebar
+                    window.VIEW_FILTER = 'ciclos';
+                    break;
+                    
+                case 'invasiones':
+                    // Solo invasiones (sidebar, sin ciclos)
+                    if (mainLayout) {
+                        const fissuresContent = mainLayout.querySelector('#fissures-content');
+                        if (fissuresContent) fissuresContent.style.display = 'none';
+                    }
+                    if (missionsContent) missionsContent.style.display = 'none';
+                    if (archimideanContent) archimideanContent.style.display = 'none';
+                    window.VIEW_FILTER = 'invasiones';
+                    break;
+                    
+                case 'sortie':
+                    // Solo Sortie
+                    if (mainLayout) mainLayout.style.display = 'none';
+                    if (archimideanContent) archimideanContent.style.display = 'none';
+                    window.VIEW_FILTER = 'sortie';
+                    break;
+                    
+                case 'archon':
+                    // Solo Cacería de Arcontes
+                    if (mainLayout) mainLayout.style.display = 'none';
+                    if (archimideanContent) archimideanContent.style.display = 'none';
+                    window.VIEW_FILTER = 'archon';
+                    break;
+                    
+                case 'arquimedeas':
+                    // Solo Arquímedeas
+                    if (mainLayout) mainLayout.style.display = 'none';
+                    if (missionsContent) missionsContent.style.display = 'none';
+                    break;
+                    
+                case 'incarnon':
+                    // Panel exclusivo: Rotación de Armas Incarnon
+                    if (mainLayout) mainLayout.style.display = 'none';
+                    if (missionsContent) missionsContent.style.display = 'none';
+                    if (archimideanContent) archimideanContent.style.display = 'none';
+                    renderIncarnonRotation();
+                    break;
+                    
+                case 'circuito':
+                    // Panel exclusivo: Rotación de Warframes en Circuito
+                    if (mainLayout) mainLayout.style.display = 'none';
+                    if (missionsContent) missionsContent.style.display = 'none';
+                    if (archimideanContent) archimideanContent.style.display = 'none';
+                    renderCircuitRotation();
+                    break;
+                    
+                case 'teshin':
+                    // Panel exclusivo: Tienda de Teshin
+                    if (mainLayout) mainLayout.style.display = 'none';
+                    if (missionsContent) missionsContent.style.display = 'none';
+                    if (archimideanContent) archimideanContent.style.display = 'none';
+                    renderTeshinRotation();
+                    break;
+                    
+                default:
+                    // Vista desconocida, mostrar todo
+                    console.warn(`Vista desconocida: ${view}`);
+            }
+        }
+        
+        /* ===== FUNCIONES DE ROTACIONES EXCLUSIVAS ===== */
+        
+        // Renderizar rotación de Armas Incarnon
+        function renderIncarnonRotation() {
+            const currentWeek = getCurrentWeek(8, 'incarnon');
+            
+            let html = '<div style="max-width: 700px; margin: 20px auto;">';
+            html += '<div style="text-align: center; margin-bottom: 20px;">';
+            html += '<h2 style="color: #EB6F92; font-size: 1.8rem; margin-bottom: 10px;">Rotación de Armas Incarnon</h2>';
+            html += '<div style="font-size: 0.85rem; color: #8b95a5;">Ciclo de 8 semanas • Reset domingo 21:00hrs GMT-3</div>';
+            html += '</div>';
+            
+            html += '<div style="display: grid; gap: 8px;">';
+            INCARNON_ROTATION.forEach(rotation => {
+                const isActive = rotation.week === currentWeek;
+                const bgColor = isActive ? '#1a2332' : '#0f1219';
+                const borderColor = isActive ? '#EB6F92' : '#1a1f3a';
+                const borderWidth = isActive ? '2px' : '1px';
+                
+                html += `<div class="rotation-item" style="background: ${bgColor}; padding: 10px 12px; border-radius: 8px; border: ${borderWidth} solid ${borderColor}; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: default;">`;
+                html += `<div style="display: flex; align-items: center; gap: 10px;">`;
+                html += `<div style="font-size: 1.2rem; font-weight: 700; color: ${isActive ? '#EB6F92' : '#CBA9FE'}; min-width: 100px;">Semana ${rotation.week}</div>`;
+                html += `<div style="flex: 1; display: flex; flex-wrap: wrap; gap: 8px;">`;
+                
+                rotation.weapons.forEach(weapon => {
+                    html += `<span style="background: #151933; padding: 6px 12px; border-radius: 4px; font-size: 0.8rem; color: ${isActive ? '#e0e6ed' : '#8b95a5'};">${weapon}</span>`;
+                });
+                
+                html += `</div>`;
+                if (isActive) {
+                    html += `<div style="background: #EB6F92; color: #0f1219; padding: 4px 10px; border-radius: 4px; font-size: 0.7rem; font-weight: 600;">ACTIVA</div>`;
+                }
+                html += `</div></div>`;
+            });
+            html += '</div></div>';
+            
+            document.getElementById('rotations-content').innerHTML = html;
+            applyRotationHoverEffects();
+        }
+        
+        // Renderizar rotación de Warframes en Circuito
+        function renderCircuitRotation() {
+            const currentWeek = getCurrentWeek(11, 'circuit');
+            
+            let html = '<div style="max-width: 500px; margin: 20px auto;">';
+            html += '<div style="text-align: center; margin-bottom: 20px;">';
+            html += '<h2 style="color: #EB6F92; font-size: 1.8rem; margin-bottom: 10px;">Rotación de Warframes - Circuito</h2>';
+            html += '<div style="font-size: 0.85rem; color: #8b95a5;">Ciclo de 11 semanas • Reset domingo 21:00hrs GMT-3</div>';
+            html += '</div>';
+            
+            html += '<div style="display: grid; gap: 8px;">';
+            CIRCUIT_ROTATION.forEach(rotation => {
+                const isActive = rotation.week === currentWeek;
+                const bgColor = isActive ? '#1a2332' : '#0f1219';
+                const borderColor = isActive ? '#EB6F92' : '#1a1f3a';
+                const borderWidth = isActive ? '2px' : '1px';
+                
+                html += `<div class="rotation-item" style="background: ${bgColor}; padding: 10px 12px; border-radius: 8px; border: ${borderWidth} solid ${borderColor}; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: default;">`;
+                html += `<div style="display: flex; align-items: center; gap: 10px;">`;
+                html += `<div style="font-size: 1.2rem; font-weight: 700; color: ${isActive ? '#EB6F92' : '#CBA9FE'}; min-width: 100px;">Semana ${rotation.week}</div>`;
+                html += `<div style="flex: 1; display: flex; flex-wrap: wrap; gap: 8px;">`;
+                
+                rotation.frames.forEach(frame => {
+                    html += `<span style="background: #151933; padding: 6px 12px; border-radius: 4px; font-size: 0.8rem; color: ${isActive ? '#e0e6ed' : '#8b95a5'};">${frame}</span>`;
+                });
+                
+                html += `</div>`;
+                if (isActive) {
+                    html += `<div style="background: #EB6F92; color: #0f1219; padding: 4px 10px; border-radius: 4px; font-size: 0.7rem; font-weight: 600;">ACTIVA</div>`;
+                }
+                html += `</div></div>`;
+            });
+            html += '</div></div>';
+            
+            document.getElementById('rotations-content').innerHTML = html;
+            applyRotationHoverEffects();
+        }
+        
+        // Renderizar rotación de Tienda de Teshin
+        function renderTeshinRotation() {
+            const currentWeek = getCurrentWeek(8, 'teshin');
+            
+            let html = '<div style="max-width: 450px; margin: 20px auto;">';
+            html += '<div style="text-align: center; margin-bottom: 20px;">';
+            html += '<h2 style="color: #EB6F92; font-size: 1.8rem; margin-bottom: 10px;">Tienda de Teshin</h2>';
+            html += '<div style="font-size: 0.85rem; color: #8b95a5;">Ciclo de 8 semanas • Reset domingo 21:00hrs GMT-3</div>';
+            html += '</div>';
+            
+            html += '<div style="display: grid; gap: 8px;">';
+            TESHIN_ROTATION.forEach(rotation => {
+                const isActive = rotation.week === currentWeek;
+                const bgColor = isActive ? '#1a2332' : '#0f1219';
+                const borderColor = isActive ? '#EB6F92' : '#1a1f3a';
+                const borderWidth = isActive ? '2px' : '1px';
+                
+                html += `<div class="rotation-item" style="background: ${bgColor}; padding: 10px 12px; border-radius: 8px; border: ${borderWidth} solid ${borderColor}; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: default;">`;
+                html += `<div style="display: flex; align-items: center; justify-content: space-between;">`;
+                html += `<div style="font-size: 1.1rem; font-weight: 700; color: ${isActive ? '#EB6F92' : '#CBA9FE'};">Semana ${rotation.week}</div>`;
+                
+                rotation.items.forEach(item => {
+                    html += `<div style="flex: 1; margin: 0 15px;">`;
+                    html += `<div style="font-size: 0.9rem; color: ${isActive ? '#e0e6ed' : '#8b95a5'}; font-weight: 600;">${item.name}</div>`;
+                    html += `<div style="font-size: 0.75rem; color: #F4C076; margin-top: 3px;">${item.cost}</div>`;
+                    html += `</div>`;
+                });
+                
+                if (isActive) {
+                    html += `<div style="background: #EB6F92; color: #0f1219; padding: 4px 10px; border-radius: 4px; font-size: 0.7rem; font-weight: 600;">ACTIVA</div>`;
+                }
+                html += `</div></div>`;
+            });
+            html += '</div></div>';
+            
+            document.getElementById('rotations-content').innerHTML = html;
+            applyRotationHoverEffects();
+        }
+        
+        // Aplicar efectos hover a los items de rotación
+        function applyRotationHoverEffects() {
+            const items = document.querySelectorAll('.rotation-item');
+            items.forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    this.style.borderColor = '#667eea';
+                    this.style.transform = 'translateX(4px)';
+                    this.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.15)';
+                });
+                item.addEventListener('mouseleave', function() {
+                    const isActive = this.style.borderWidth === '2px';
+                    this.style.borderColor = isActive ? '#EB6F92' : '#1a1f3a';
+                    this.style.transform = 'translateX(0)';
+                    this.style.boxShadow = 'none';
+                });
+            });
         }
         
         /* ===== INICIALIZACIÓN ===== */
@@ -1504,6 +1846,7 @@
         // Inicializar la aplicación
         async function init() {
             console.log('Iniciando...');
+            applyViewMode(); // Aplicar filtro de vista
             await loadNodeData(); // Cargar datos de nodos
             await loadSortieData(); // Cargar datos de Sortie
             await loadOracleTranslations(); // Cargar traducciones de Oracle
