@@ -94,6 +94,15 @@
             margin-right: 0px;
         }
         
+        /* Contenedor para Void Storms en view=fisuras */
+        #void-storms-content.narrow-view {
+            max-width: 740px; /* Ancho */
+            margin-left: 0px;
+            margin-right: auto;
+            border-radius: 6px;
+            border: 1px solid #1A1F3A;
+        }
+        
         .mission-box {
             background: #0f1219;
             padding: 10px;
@@ -112,7 +121,7 @@
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
         }
 
-        /* Cada columna de fisuras - ULTRA COMPACTA */
+        /* Cada columna de fisuras */
         .fissure-column {
             background: #0f1219;
             padding: 8px;
@@ -120,7 +129,7 @@
             border: 1px solid #1a1f3a;
         }
 
-        /* Encabezado de cada columna - ULTRA PEQUEÑO */
+        /* Encabezado de cada columna */
         .column-header {
             font-size: 0.85rem;
             font-weight: 700;
@@ -130,12 +139,12 @@
             text-align: center;
         }
 
-        /* Grupo de fisuras por tier (Lith, Meso, Neo, etc) - ULTRA COMPACTO */
+        /* Grupo de fisuras por tier (Lith, Meso, Neo, etc) */
         .tier-group {
             margin-bottom: 6px;
         }
 
-        /* Título de cada tier - ULTRA PEQUEÑO */
+        /* Título de cada tier */
         .tier-title {
             font-size: 0.65rem;
             font-weight: 600;
@@ -150,7 +159,7 @@
             margin-top: 0;
         }
 
-        /* Card individual para cada fisura - ULTRA COMPACTA */
+        /* Card individual para cada fisura */
         .card {
             background: #151933;
             border: 1px solid #2a3150;
@@ -196,7 +205,7 @@
             text-overflow: ellipsis;
         }
 
-        /* Timer de cuenta regresiva - ULTRA COMPACTO */
+        /* Timer de cuenta regresiva */
         .timer {
             font-size: 0.75rem;
             font-weight: 700;
@@ -218,7 +227,7 @@
             50% { opacity: 0.6; }
         }
 
-        /* Etiqueta de información (enemigo, facción, etc) - OCULTA EN COMPACTO */
+        /* Etiqueta de información (enemigo, facción, etc) */
         .info-tag {
             display: none;
         }
@@ -426,6 +435,9 @@
         <!-- Sección inferior: Arquimedeas -->
         <div id="archimidean-content"></div>
         
+        <!-- Sección: Void Storms -->
+        <div id="void-storms-content"></div>
+        
         <!-- Sección: Rotaciones exclusivas (solo con ?view=) -->
         <div id="rotations-content"></div>
         
@@ -446,7 +458,7 @@
         const SORTIE_DATA_URL = 'https://raw.githubusercontent.com/WFCD/warframe-worldstate-data/master/data/sortieData.json';
         
         // Variables globales
-        let gameData = {fissures: [], cycles: {}, invasions: [], archimideans: {temporal: null, deep: null}, sortie: null, archonHunt: null}; // Almacena todos los datos del juego
+        let gameData = {fissures: [], cycles: {}, invasions: [], archimideans: {temporal: null, deep: null}, sortie: null, archonHunt: null, voidStorms: []}; // Almacena todos los datos del juego
         let lastFissureIds = new Set(); // Para detectar nuevas fisuras
         let SORTIE_DATA = {}; // Datos de modificadores y bosses de Sortie
         
@@ -491,6 +503,27 @@
             {week: 8, items: [{name: 'Riven de Escopeta', cost: '75 Esencias'}]}
         ];
         
+        // Rotación de Armas Coda (2 batches, rotan cada 4 días a las 00:00 UTC)
+        const CODA_ROTATION = [
+            {batch: 'A', name: 'Bache A', weapons: [
+                {name: 'Coda Hema', category: 'Primaria'},
+                {name: 'Coda Sporothrix', category: 'Primaria'},
+                {name: 'Coda Catabolyst', category: 'Secundaria'},
+                {name: 'Coda Pox', category: 'Secundaria'},
+                {name: 'Dual Coda Toxicas', category: 'Secundaria'},
+                {name: 'Coda Mire', category: 'Cuerpo a cuerpo'},
+                {name: 'Coda Motovore', category: 'Cuerpo a cuerpo'}
+            ]},
+            {batch: 'B', name: 'Bache B', weapons: [
+                {name: 'Coda Bassocyst', category: 'Primaria'},
+                {name: 'Coda Synapse', category: 'Primaria'},
+                {name: 'Coda Tysis', category: 'Secundaria'},
+                {name: 'Coda Caustacyst', category: 'Cuerpo a cuerpo'},
+                {name: 'Coda Hirudo', category: 'Cuerpo a cuerpo'},
+                {name: 'Coda Pathocyst', category: 'Cuerpo a cuerpo'}
+            ]}
+        ];
+        
         // Calcular semana actual automáticamente (reset lunes 00:00 UTC)
         // EPOCHS CALIBRADOS PARA: Incarnon semana 5, Circuito semana 5, Teshin semana 1
         function getCurrentWeek(totalWeeks, rotationType) {
@@ -510,6 +543,30 @@
             
             const weeksSinceEpoch = Math.floor((now - mondayEpoch) / (7 * 24 * 60 * 60 * 1000));
             return (weeksSinceEpoch % totalWeeks) + 1;
+        }
+        
+        // Calcular batch actual de Coda (rotan cada 4 días a las 00:00 UTC)
+        // Reset anterior: lunes 8 dic 2025 00:00 UTC (Batch A)
+        // Próximo reset: viernes 12 dic 2025 00:00 UTC (Batch B)
+        function getCurrentCodaBatch() {
+            const now = Date.now();
+            const referenceRotation = new Date('2025-12-08T00:00:00Z').getTime(); // 8 dic 2025 00:00 UTC (inicio Batch A)
+            const rotationDuration = 4 * 24 * 60 * 60 * 1000; // 4 días en ms
+            
+            // Calcular cuántos ciclos completos han pasado desde la referencia
+            const elapsed = now - referenceRotation;
+            const cyclesCompleted = Math.floor(elapsed / rotationDuration);
+            
+            // Batch A empieza en ciclo 0, B en ciclo 1, A en ciclo 2, etc.
+            const currentBatch = cyclesCompleted % 2 === 0 ? 'A' : 'B';
+            
+            // Calcular tiempo hasta la próxima rotación
+            const nextRotationTime = referenceRotation + ((cyclesCompleted + 1) * rotationDuration);
+            
+            return {
+                batch: currentBatch,
+                nextRotation: new Date(nextRotationTime).toISOString()
+            };
         }
         
         /* ===== MAPEOS DE DATOS ===== */
@@ -581,6 +638,7 @@
 
         // Almacena información de nodos (planetas, enemigos)
         let NODE_DATA = {};
+        let EXPORT_REGIONS_DATA = {};
         
         /* ===== FUNCIONES DE DATOS ===== */
         
@@ -596,6 +654,18 @@
             }
         }
         
+        // Cargar datos de ExportRegions (para Railjack/Void Storms)
+        async function loadExportRegions() {
+            try {
+                const response = await fetch('https://browse.wf/warframe-public-export-plus/ExportRegions.json');
+                const data = await response.json();
+                EXPORT_REGIONS_DATA = data;
+                console.log('Export Regions cargados:', Object.keys(EXPORT_REGIONS_DATA).length);
+            } catch (error) {
+                console.error('Error cargando Export Regions:', error);
+            }
+        }
+        
         // Cargar datos de Sortie (modificadores y bosses)
         async function loadSortieData() {
             try {
@@ -608,31 +678,109 @@
             }
         }
 
-        // Obtener información de un nodo específico
+        // Obtener información de un nodo específico (versión síncrona)
         function getNodeInfo(nodeKey) {
+            // Intentar primero con solNodes (fisuras normales)
             const nodeInfo = NODE_DATA[nodeKey];
             if (nodeInfo) {
                 // Traducir el planeta en el nombre del nodo
                 let nodeName = nodeInfo.value || nodeKey;
                 // Buscar si contiene un planeta entre paréntesis y traducirlo
                 const planetMatch = nodeName.match(/\(([^)]+)\)/);
+                let planetName = 'Desconocido';
                 if (planetMatch) {
                     const planet = planetMatch[1];
                     const translatedPlanet = PLANET_TRANSLATION[planet] || planet;
                     nodeName = nodeName.replace(`(${planet})`, `(${translatedPlanet})`);
+                    planetName = translatedPlanet;
                 }
                 
                 return {
                     name: nodeName,
+                    planet: planetName,
+                    planetTranslated: planetName,
                     enemy: nodeInfo.enemy || 'Desconocido',
                     type: nodeInfo.type || 'Desconocido'
                 };
             }
+            
             return {
                 name: nodeKey,
+                planet: 'Desconocido',
+                planetTranslated: 'Desconocido',
                 enemy: 'Desconocido',
                 type: 'Desconocido'
             };
+        }
+        
+        // Obtener información de un nodo Railjack (versión async para Void Storms)
+        async function getRailjackNodeInfo(nodeKey) {
+            const exportNode = EXPORT_REGIONS_DATA[nodeKey];
+            if (exportNode) {
+                try {
+                    // Obtener nombre del nodo
+                    const nodeNamePath = exportNode.name;
+                    const nodeNameResponse = await fetch(`https://browse.wf${nodeNamePath}`);
+                    const nodeNameData = await nodeNameResponse.json();
+                    const nodeName = nodeNameData.es || nodeNameData.en || 'Unknown';
+                    
+                    // Obtener nombre del planeta/sistema
+                    const systemPath = exportNode.systemName;
+                    const systemResponse = await fetch(`https://browse.wf${systemPath}`);
+                    const systemData = await systemResponse.json();
+                    const planetName = systemData.es || systemData.en || 'Unknown';
+                    
+                    // Obtener facción/enemigo
+                    const factionMap = {
+                        'FC_GRINEER': 'Grineer',
+                        'FC_CORPUS': 'Corpus',
+                        'FC_INFESTATION': 'Infestados',
+                        'FC_CORRUPTED': 'Corruptos',
+                        'FC_OROKIN': 'Orokin'
+                    };
+                    const enemy = factionMap[exportNode.faction] || exportNode.faction || 'Unknown';
+                    
+                    // Obtener niveles de enemigos
+                    const minLevel = exportNode.minEnemyLevel || 0;
+                    const maxLevel = exportNode.maxEnemyLevel || 0;
+                    const levelRange = minLevel > 0 && maxLevel > 0 ? `(${minLevel}-${maxLevel})` : '';
+                    
+                    return {
+                        name: nodeName,
+                        planet: planetName,
+                        planetTranslated: planetName,
+                        enemy: enemy,
+                        levelRange: levelRange,
+                        type: 'Railjack'
+                    };
+                } catch (error) {
+                    console.error('Error obteniendo info de ExportRegion:', nodeKey, error);
+                }
+            }
+            
+            return {
+                name: nodeKey,
+                planet: 'Desconocido',
+                planetTranslated: 'Desconocido',
+                enemy: 'Desconocido',
+                type: 'Desconocido'
+            };
+        }
+        
+        // Obtener tipo de misión traducido desde ExportRegions
+        async function getMissionType(nodeKey) {
+            const exportNode = EXPORT_REGIONS_DATA[nodeKey];
+            if (exportNode && exportNode.missionName) {
+                try {
+                    const missionPath = exportNode.missionName;
+                    const response = await fetch(`https://browse.wf${missionPath}`);
+                    const data = await response.json();
+                    return data.es || data.en || null;
+                } catch (error) {
+                    console.error('Error obteniendo tipo de misión:', nodeKey, error);
+                }
+            }
+            return null;
         }
         
         /* ===== FUNCIONES DE TIEMPO ===== */
@@ -648,6 +796,16 @@
             if (hours > 0) return `${hours}h ${minutes % 60}m ${seconds % 60}s`;
             if (minutes > 0) return `${minutes}m ${seconds % 60}s`;
             return `${seconds}s`;
+        }
+        
+        // Formatear tiempo para Coda (siempre muestra días, horas, minutos, segundos)
+        function formatTimeCoda(ms) {
+            const seconds = Math.floor(ms / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+            
+            return `${days} días ${hours % 24} horas ${minutes % 60} minutos ${seconds % 60} segundos`;
         }
 
         // Calcular tiempo restante hasta que expire
@@ -1148,12 +1306,17 @@
             document.querySelectorAll('.timer[data-expiry]').forEach(timer => {
                 const expiry = timer.dataset.expiry;
                 const remaining = getTimeRemaining(expiry);
+                const isCodaTimer = timer.classList.contains('coda-timer');
                 
                 if (remaining <= 0) {
                     timer.textContent = 'Expiró';
                     timer.classList.add('expiring');
+                    // Si es el timer de Coda y expiró, re-renderizar
+                    if (isCodaTimer) {
+                        setTimeout(() => renderCodaRotation(), 1000);
+                    }
                 } else {
-                    timer.textContent = formatTime(remaining);
+                    timer.textContent = isCodaTimer ? formatTimeCoda(remaining) : formatTime(remaining);
                     if (isExpiringSoon(remaining)) {
                         timer.classList.add('expiring');
                     } else {
@@ -1213,6 +1376,40 @@
                 
                 lastFissureIds = currentFissureIds;
                 console.log('Fisuras activas:', fissures.length);
+                
+                // Parsear Void Storms desde VoidStorms
+                const voidStormsRaw = (data.VoidStorms || [])
+                    .filter(storm => {
+                        const expiry = new Date(parseInt(storm.Expiry.$date.$numberLong));
+                        return expiry > Date.now();
+                    });
+                
+                // Procesar Void Storms con async (para obtener nombres de nodos)
+                const voidStorms = await Promise.all(
+                    voidStormsRaw.map(async storm => {
+                        const id = storm._id.$oid;
+                        const expiry = new Date(parseInt(storm.Expiry.$date.$numberLong));
+                        const tier = TIER_MAP[storm.ActiveMissionTier] || storm.ActiveMissionTier;
+                        
+                        // Obtener info del nodo (async para Railjack)
+                        const nodeInfo = await getRailjackNodeInfo(storm.Node);
+                        
+                        // Obtener tipo de misión desde ExportRegions
+                        const missionType = await getMissionType(storm.Node) || MISSION_MAP[storm.MissionType] || storm.MissionType;
+                        
+                        return {
+                            id: id,
+                            tier: tier,
+                            missionType: missionType,
+                            node: nodeInfo.name,
+                            planet: nodeInfo.planetTranslated,
+                            enemy: nodeInfo.enemy,
+                            levelRange: nodeInfo.levelRange || '',
+                            expiry: expiry.toISOString()
+                        };
+                    })
+                );
+                console.log('Void Storms activas:', voidStorms.length);
 
                 // Parsear ciclos planetarios
                 const cetusData = parseCycle(data.SyndicateMissions, 'CetusSyndicate');
@@ -1239,7 +1436,7 @@
                 const archonHunt = parseArchonHunt(data.LiteSorties);
 
                 // Guardar datos y renderizar
-                gameData = { fissures, cycles, invasions, archimideans, sortie, archonHunt };
+                gameData = { fissures, cycles, invasions, archimideans, sortie, archonHunt, voidStorms };
                 render();
                 
             } catch (error) {
@@ -1269,6 +1466,9 @@
             
             // Renderizar arquimedeas
             renderArchimideans();
+            
+            // Renderizar Void Storms
+            renderVoidStorms();
         }
         
         // Diccionario de traducciones de Oracle (se carga dinámicamente)
@@ -1515,6 +1715,93 @@
             }
             
             document.getElementById('archimidean-content').innerHTML = html;
+        }
+        
+        // Renderizar Void Storms
+        function renderVoidStorms() {
+            const voidStorms = gameData.voidStorms || [];
+            console.log('Renderizando Void Storms:', voidStorms.length);
+            
+            const container = document.getElementById('void-storms-content');
+            
+            // Aplicar clase narrow-view solo en view=fisuras
+            const urlParams = new URLSearchParams(window.location.search);
+            const view = urlParams.get('view');
+            if (view === 'fisuras') {
+                container.classList.add('narrow-view');
+            } else {
+                container.classList.remove('narrow-view');
+            }
+            
+            if (voidStorms.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            let html = '<div style="margin-top: 0px; padding: 15px; background: #0F1219; border-radius: 8px;">';
+            html += `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">`;
+            html += `<h2 style="font-size: 1rem; margin: 0; color: #EB6F92;">Tormentas del vacío</h2>`;
+            html += `</div>`;
+            
+            // Agrupar por tier
+            const byTier = {};
+            TIER_ORDER.forEach(tier => { byTier[tier] = []; });
+            
+            voidStorms.forEach(storm => {
+                const tier = storm.tier || 'Unknown';
+                if (!byTier[tier]) {
+                    byTier[tier] = [];
+                }
+                byTier[tier].push(storm);
+            });
+            
+            console.log('Void Storms agrupadas por tier:', byTier);
+            
+            // Renderizar cada tier (primero los de TIER_ORDER, luego cualquier otro)
+            let hasStorms = false;
+            const allTiers = [...TIER_ORDER];
+            Object.keys(byTier).forEach(tier => {
+                if (!allTiers.includes(tier)) {
+                    allTiers.push(tier);
+                }
+            });
+            
+            allTiers.forEach(tier => {
+                const tierStorms = byTier[tier];
+                if (tierStorms && tierStorms.length > 0) {
+                    hasStorms = true;
+                    html += `<div style="margin-bottom: 10px;">`;
+                    html += `<div style="font-size: 0.7rem; font-weight: 600; color: #8b95a5; margin-bottom: 6px; text-transform: uppercase;">${tier}</div>`;
+                    
+                    tierStorms.forEach(storm => {
+                        const remaining = getTimeRemaining(storm.expiry);
+                        const timerClass = isExpiringSoon(remaining) ? 'timer expiring' : 'timer';
+                        const location = storm.planet ? `${storm.node} (${storm.planet})` : storm.node;
+                        
+                        const enemyInfo = storm.levelRange ? `${storm.enemy} ${storm.levelRange}` : storm.enemy;
+                        
+                        html += `
+                            <div class="card" data-storm-id="${storm.id}" style="margin-bottom: 6px;">
+                                <div class="card-info">
+                                    <div class="card-title">${storm.missionType} <span class="card-subtitle">${location} - ${enemyInfo}</span></div>
+                                </div>
+                                <div class="${timerClass}" data-expiry="${storm.expiry}">
+                                    ${formatTime(remaining)}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+            });
+            
+            if (!hasStorms) {
+                html += '<div style="text-align: center; color: #8b95a5; padding: 10px;">No hay Void Storms activas</div>';
+            }
+            
+            html += '</div>';
+            console.log('Contenedor void-storms:', container, 'HTML length:', html.length);
+            container.innerHTML = html;
         }
         
         // Renderizar sidebar con ciclos e invasiones
@@ -1811,6 +2098,7 @@
             const mainLayout = document.querySelector('.main-layout');
             const missionsContent = document.getElementById('missions-content');
             const archimideanContent = document.getElementById('archimidean-content');
+            const voidStormsContent = document.getElementById('void-storms-content');
             const footer = document.querySelector('footer');
             
             // Ocultar elementos por defecto
@@ -1821,13 +2109,14 @@
             // Mostrar solo la sección pedida con el link
             switch(view) {
                 case 'fisuras':
-                    // Solo fisuras (lado derecho del main-layout)
+                    // Solo fisuras + void storms (lado derecho del main-layout)
                     if (mainLayout) {
                         const sidebar = mainLayout.querySelector('.sidebar');
                         if (sidebar) sidebar.style.display = 'none';
                     }
                     if (missionsContent) missionsContent.style.display = 'none';
                     if (archimideanContent) archimideanContent.style.display = 'none';
+                    // Void Storms se muestran debajo de fisuras
                     break;
                     
                 case 'ciclos':
@@ -1838,6 +2127,7 @@
                     }
                     if (missionsContent) missionsContent.style.display = 'none';
                     if (archimideanContent) archimideanContent.style.display = 'none';
+                    if (voidStormsContent) voidStormsContent.style.display = 'none';
                     // Necesitamos filtrar invasiones en renderSidebar
                     window.VIEW_FILTER = 'ciclos';
                     break;
@@ -1850,6 +2140,7 @@
                     }
                     if (missionsContent) missionsContent.style.display = 'none';
                     if (archimideanContent) archimideanContent.style.display = 'none';
+                    if (voidStormsContent) voidStormsContent.style.display = 'none';
                     window.VIEW_FILTER = 'invasiones';
                     break;
                     
@@ -1862,6 +2153,7 @@
                     // missions-content se oculta porque Sortie/Archon se renderizan en sidebar
                     if (missionsContent) missionsContent.style.display = 'none';
                     if (archimideanContent) archimideanContent.style.display = 'none';
+                    if (voidStormsContent) voidStormsContent.style.display = 'none';
                     window.VIEW_FILTER = 'ciclos_invasiones';
                     break;
                     
@@ -1869,6 +2161,7 @@
                     // Solo Sortie
                     if (mainLayout) mainLayout.style.display = 'none';
                     if (archimideanContent) archimideanContent.style.display = 'none';
+                    if (voidStormsContent) voidStormsContent.style.display = 'none';
                     window.VIEW_FILTER = 'sortie';
                     break;
                     
@@ -1876,6 +2169,7 @@
                     // Solo Cacería de Arcontes
                     if (mainLayout) mainLayout.style.display = 'none';
                     if (archimideanContent) archimideanContent.style.display = 'none';
+                    if (voidStormsContent) voidStormsContent.style.display = 'none';
                     window.VIEW_FILTER = 'archon';
                     break;
                     
@@ -1883,6 +2177,7 @@
                     // Solo Arquímedeas en vertical
                     if (mainLayout) mainLayout.style.display = 'none';
                     if (missionsContent) missionsContent.style.display = 'none';
+                    if (voidStormsContent) voidStormsContent.style.display = 'none';
                     window.VIEW_FILTER = 'arquimedeas';
                     break;
                     
@@ -1891,6 +2186,7 @@
                     if (mainLayout) mainLayout.style.display = 'none';
                     if (missionsContent) missionsContent.style.display = 'none';
                     if (archimideanContent) archimideanContent.style.display = 'none';
+                    if (voidStormsContent) voidStormsContent.style.display = 'none';
                     renderIncarnonRotation();
                     break;
                     
@@ -1899,6 +2195,7 @@
                     if (mainLayout) mainLayout.style.display = 'none';
                     if (missionsContent) missionsContent.style.display = 'none';
                     if (archimideanContent) archimideanContent.style.display = 'none';
+                    if (voidStormsContent) voidStormsContent.style.display = 'none';
                     renderCircuitRotation();
                     break;
                     
@@ -1907,7 +2204,17 @@
                     if (mainLayout) mainLayout.style.display = 'none';
                     if (missionsContent) missionsContent.style.display = 'none';
                     if (archimideanContent) archimideanContent.style.display = 'none';
+                    if (voidStormsContent) voidStormsContent.style.display = 'none';
                     renderTeshinRotation();
+                    break;
+                    
+                case 'coda':
+                    // Panel exclusivo: Rotación de Armas Coda
+                    if (mainLayout) mainLayout.style.display = 'none';
+                    if (missionsContent) missionsContent.style.display = 'none';
+                    if (archimideanContent) archimideanContent.style.display = 'none';
+                    if (voidStormsContent) voidStormsContent.style.display = 'none';
+                    renderCodaRotation();
                     break;
                     
                 default:
@@ -2033,6 +2340,80 @@
             applyRotationHoverEffects();
         }
         
+        // Renderizar rotación de Armas Coda
+        function renderCodaRotation() {
+            const codaInfo = getCurrentCodaBatch();
+            const currentBatchData = CODA_ROTATION.find(b => b.batch === codaInfo.batch);
+            const nextBatchData = CODA_ROTATION.find(b => b.batch !== codaInfo.batch);
+            const timeRemaining = getTimeRemaining(codaInfo.nextRotation);
+            
+            let html = '<div style="max-width: 800px; margin: 20px auto;">';
+            html += '<div style="text-align: center; margin-bottom: 20px;">';
+            html += '<h2 style="color: #EB6F92; font-size: 1.8rem; margin-bottom: 10px;"></h2>';
+            html += `<div style="font-size: 1.1rem; color: #EB6F92; font-weight: 600; text-align: center; margin-top: 8px;">Rota en:</div>`;
+            html += `<div class="timer coda-timer" data-expiry="${codaInfo.nextRotation}" style="font-size: 0.8rem; color: #e0e6ed; font-weight: 700; text-align: center; margin-top: 0px;">${formatTimeCoda(timeRemaining)}</div>`;
+            html += '</div>';
+            
+            // Tabla con columnas Batch, Primary, Secondary, Melee
+            html += '<div style="display: grid; gap: 8px;">';
+            
+            CODA_ROTATION.forEach(batch => {
+                const isActive = batch.batch === codaInfo.batch;
+                const bgColor = isActive ? '#1a2332' : '#0f1219';
+                const borderColor = isActive ? '#EB6F92' : '#1a1f3a';
+                const borderWidth = isActive ? '2px' : '1px';
+                
+                // Agrupar armas por categoría
+                const primary = batch.weapons.filter(w => w.category === 'Primaria');
+                const secondary = batch.weapons.filter(w => w.category === 'Secundaria');
+                const melee = batch.weapons.filter(w => w.category === 'Cuerpo a cuerpo');
+                
+                html += `<div class="rotation-item" style="background: ${bgColor}; padding: 12px; border-radius: 8px; border: ${borderWidth} solid ${borderColor}; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: default;">`;
+                
+                // Grid de 4 columnas: Batch | Primary | Secondary | Melee
+                html += `<div style="display: grid; grid-template-columns: 80px 1fr 1fr 1fr; gap: 12px; align-items: start;">`;
+                
+                // Columna Batch
+                html += `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">`;
+                html += `<div style="font-size: 1.2rem; font-weight: 700; color: ${isActive ? '#EB6F92' : '#CBA9FE'}; margin-bottom: 5px;">${batch.name}</div>`;
+                if (isActive) {
+                    html += `<div style="background: #EB6F92; color: #0f1219; padding: 3px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: 600;">ACTIVO</div>`;
+                }
+                html += `</div>`;
+                
+                // Columna Primary
+                html += `<div>`;
+                html += `<div style="font-size: 0.7rem; font-weight: 600; color: #8b95a5; margin-bottom: 6px; text-transform: uppercase; text-align: center;">Primaria</div>`;
+                primary.forEach(weapon => {
+                    html += `<div style="background: #151933; padding: 6px 10px; border-radius: 4px; margin-bottom: 4px; font-size: 0.75rem; color: ${isActive ? '#e0e6ed' : '#8b95a5'}; text-align: center;">${weapon.name}</div>`;
+                });
+                html += `</div>`;
+                
+                // Columna Secondary
+                html += `<div>`;
+                html += `<div style="font-size: 0.7rem; font-weight: 600; color: #8b95a5; margin-bottom: 6px; text-transform: uppercase; text-align: center;">Secundaria</div>`;
+                secondary.forEach(weapon => {
+                    html += `<div style="background: #151933; padding: 6px 10px; border-radius: 4px; margin-bottom: 4px; font-size: 0.75rem; color: ${isActive ? '#e0e6ed' : '#8b95a5'}; text-align: center;">${weapon.name}</div>`;
+                });
+                html += `</div>`;
+                
+                // Columna Melee
+                html += `<div>`;
+                html += `<div style="font-size: 0.7rem; font-weight: 600; color: #8b95a5; margin-bottom: 6px; text-transform: uppercase; text-align: center;">Cuerpo a cuerpo</div>`;
+                melee.forEach(weapon => {
+                    html += `<div style="background: #151933; padding: 6px 10px; border-radius: 4px; margin-bottom: 4px; font-size: 0.75rem; color: ${isActive ? '#e0e6ed' : '#8b95a5'}; text-align: center;">${weapon.name}</div>`;
+                });
+                html += `</div>`;
+                
+                html += `</div></div>`;
+            });
+            
+            html += '</div></div>';
+            
+            document.getElementById('rotations-content').innerHTML = html;
+            applyRotationHoverEffects();
+        }
+        
         // Aplicar efectos hover a los items de rotación
         function applyRotationHoverEffects() {
             const items = document.querySelectorAll('.rotation-item');
@@ -2058,6 +2439,7 @@
             console.log('Iniciando...');
             applyViewMode(); // Aplicar filtro de vista
             await loadNodeData(); // Cargar datos de nodos
+            await loadExportRegions(); // Cargar datos de ExportRegions (Railjack)
             await loadSortieData(); // Cargar datos de Sortie
             await loadOracleTranslations(); // Cargar traducciones de Oracle
             await fetchData(); // Cargar fisuras
