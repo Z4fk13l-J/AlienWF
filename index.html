@@ -654,7 +654,7 @@
                 const response = await fetch('https://raw.githubusercontent.com/WFCD/warframe-worldstate-data/master/data/solNodes.json');
                 const data = await response.json();
                 NODE_DATA = data;
-                console.log('Nodos cargados:', Object.keys(NODE_DATA).length);
+                // console.log('Nodos cargados:', Object.keys(NODE_DATA).length);
             } catch (error) {
                 console.error('Error cargando nodos:', error);
             }
@@ -666,7 +666,7 @@
                 const response = await fetch('https://browse.wf/warframe-public-export-plus/ExportRegions.json');
                 const data = await response.json();
                 EXPORT_REGIONS_DATA = data;
-                console.log('Export Regions cargados:', Object.keys(EXPORT_REGIONS_DATA).length);
+                // console.log('Export Regions cargados:', Object.keys(EXPORT_REGIONS_DATA).length);
             } catch (error) {
                 console.error('Error cargando Export Regions:', error);
             }
@@ -678,7 +678,7 @@
                 const response = await fetch(SORTIE_DATA_URL);
                 const data = await response.json();
                 SORTIE_DATA = data;
-                console.log('Datos de Sortie cargados');
+                // console.log('Datos de Sortie cargados');
             } catch (error) {
                 console.error('Error cargando datos de Sortie:', error);
             }
@@ -760,7 +760,7 @@
                         type: 'Railjack'
                     };
                 } catch (error) {
-                    console.error('Error obteniendo info de ExportRegion:', nodeKey, error);
+                    // console.error('Error obteniendo info de ExportRegion:', nodeKey, error);
                 }
             }
             
@@ -783,7 +783,7 @@
                     const data = await response.json();
                     return data.es || data.en || null;
                 } catch (error) {
-                    console.error('Error obteniendo tipo de misión:', nodeKey, error);
+                    // console.error('Error obteniendo tipo de misión:', nodeKey, error);
                 }
             }
             return null;
@@ -1126,7 +1126,7 @@
                 itemNameCache[itemPath] = spanishName;
                 return `${itemCount}x ${spanishName}`;
             } catch (error) {
-                console.error('Error obteniendo nombre de item:', error);
+                // console.error('Error obteniendo nombre de item:', error);
                 const fallback = itemPath.split('/').pop().replace(/([A-Z])/g, ' $1').trim();
                 return `${itemCount}x ${fallback}`;
             }
@@ -1308,11 +1308,11 @@
         // Parsear Baro Ki'Teer desde VoidTraders
         async function parseBaro(voidTraders) {
             if (!voidTraders || voidTraders.length === 0) {
-                console.log('No hay datos de VoidTraders');
+                // console.log('No hay datos de VoidTraders');
                 return null;
             }
             
-            console.log('Parseando Baro Ki\'Teer:', voidTraders.length, 'traders encontrados');
+            // console.log('Parseando Baro Ki\'Teer:', voidTraders.length, 'traders encontrados');
             
             const baro = voidTraders[0];
             const activation = new Date(parseInt(baro.Activation.$date.$numberLong));
@@ -1338,7 +1338,7 @@
                     const planetData = await planetResponse.json();
                     planetName = planetData.es || planetData.en || 'Desconocido';
                 } catch (error) {
-                    console.error('Error obteniendo info de Baro:', error);
+                    // console.error('Error obteniendo info de Baro:', error);
                     relayName = nodeKey;
                 }
             }
@@ -1349,20 +1349,62 @@
                 inventory = await Promise.all(
                     baro.Manifest.map(async item => {
                         const itemPath = item.ItemType;
-                        let itemName = 'Unknown';
+                        const itemFileName = itemPath.split('/').pop();
+                        
+                        // Hardcoded: Plano de Las Arenas de Inaros
+                        if (itemFileName === 'MummyQuestKeyBlueprint') {
+                            return {
+                                name: 'Las Arenas de Inaros',
+                                ducats: item.PrimePrice || 0,
+                                credits: item.RegularPrice || 0
+                            };
+                        }
+                        
+                        // Fallback: extraer nombre del path y formatearlo
+                        let itemName = itemFileName
+                            // .replace(/([A-Z])/g, ' $1') // Agregar espacio antes de mayúsculas
+                            // .replace(/Prime/g, 'Prime') // Mantener Prime junto
+                            // .trim();
                         
                         try {
-                            const itemResponse = await fetch(`https://browse.wf${itemPath}`);
-                            const itemData = await itemResponse.json();
+                            let fetchUrl = itemPath;
                             
-                            if (itemData.name) {
-                                const nameResponse = await fetch(`https://browse.wf${itemData.name}`);
-                                const nameData = await nameResponse.json();
-                                itemName = nameData.es || nameData.en || 'Unknown';
+                            // Si es una reliquia (VoidProjection), construir URL especial
+                            if (itemFileName.includes('VoidProjection')) {
+                                fetchUrl = `/Lotus/Types/Game/Projections/${itemFileName}`;
+                                
+                                const itemResponse = await fetch(`https://browse.wf${fetchUrl}`);
+                                const itemData = await itemResponse.json();
+                                
+                                // Extraer era y category para construir el nombre de la reliquia
+                                if (itemData.era && itemData.category) {
+                                    itemName = `Reliquia ${itemData.era} ${itemData.category}`;
+                                }
+                            } else {
+                                // Para items normales, buscar traducción
+                                const itemResponse = await fetch(`https://browse.wf${fetchUrl}`);
+                                const itemData = await itemResponse.json();
+                                
+                                if (itemData.name) {
+                                    try {
+                                        const nameResponse = await fetch(`https://browse.wf${itemData.name}`);
+                                        const nameData = await nameResponse.json();
+                                        // Usar español si está disponible, si no usar inglés, si no el nombre del path formateado
+                                        if (nameData.es) {
+                                            itemName = nameData.es;
+                                        } else if (nameData.en) {
+                                            itemName = nameData.en;
+                                        }
+                                        // Si no hay traducción, mantener itemName formateado del path
+                                    } catch (nameError) {
+                                        // console.log(`Sin traducción para ${itemData.name}, usando: ${itemName}`);
+                                        // Mantener el itemName formateado del fallback
+                                    }
+                                }
                             }
                         } catch (error) {
-                            console.error('Error obteniendo nombre de item de Baro:', error);
-                            itemName = itemPath.split('/').pop();
+                            // console.log(`Error obteniendo info de item ${fetchUrl || itemPath}, usando: ${itemName}`);
+                            // Mantener el itemName formateado del fallback
                         }
                         
                         return {
@@ -1467,11 +1509,11 @@
                 // Detectar nuevas fisuras
                 const newFissures = Array.from(currentFissureIds).filter(id => !lastFissureIds.has(id));
                 if (newFissures.length > 0 && lastFissureIds.size > 0) {
-                    console.log('Nuevas fisuras detectadas:', newFissures.length);
+                    // console.log('Nuevas fisuras detectadas:', newFissures.length);
                 }
                 
                 lastFissureIds = currentFissureIds;
-                console.log('Fisuras activas:', fissures.length);
+                // console.log('Fisuras activas:', fissures.length);
                 
                 // Parsear Void Storms desde VoidStorms
                 const voidStormsRaw = (data.VoidStorms || [])
@@ -1505,7 +1547,7 @@
                         };
                     })
                 );
-                console.log('Void Storms activas:', voidStorms.length);
+                // console.log('Void Storms activas:', voidStorms.length);
 
                 // Parsear ciclos planetarios
                 const cetusData = parseCycle(data.SyndicateMissions, 'CetusSyndicate');
@@ -1539,7 +1581,7 @@
                 render();
                 
             } catch (error) {
-                console.error('❌ Error:', error);
+                // console.error('❌ Error:', error);
                 document.getElementById('fissures-content').innerHTML = `
                     <div class="error">
                         ❌ Error al cargar datos: ${error.message}
@@ -1584,10 +1626,10 @@
                 const response = await fetch('https://oracle.browse.wf/dicts/es.json');
                 if (response.ok) {
                     oracleTranslations = await response.json();
-                    console.log('Diccionario de traducciones cargado:', Object.keys(oracleTranslations).length, 'entradas');
+                    // console.log('Diccionario de traducciones cargado:', Object.keys(oracleTranslations).length, 'entradas');
                 }
             } catch (error) {
-                console.error('Error cargando traducciones:', error);
+                // console.error('Error cargando traducciones:', error);
             }
         }
         
@@ -1824,7 +1866,7 @@
         // Renderizar Void Storms
         function renderVoidStorms() {
             const voidStorms = gameData.voidStorms || [];
-            console.log('Renderizando Void Storms:', voidStorms.length);
+            // console.log('Renderizando Void Storms:', voidStorms.length);
             
             const container = document.getElementById('void-storms-content');
             
@@ -1859,7 +1901,7 @@
                 byTier[tier].push(storm);
             });
             
-            console.log('Void Storms agrupadas por tier:', byTier);
+            // console.log('Void Storms agrupadas por tier:', byTier);
             
             // Renderizar cada tier (primero los de TIER_ORDER, luego cualquier otro)
             let hasStorms = false;
@@ -1904,7 +1946,7 @@
             }
             
             html += '</div>';
-            console.log('Contenedor void-storms:', container, 'HTML length:', html.length);
+            // console.log('Contenedor void-storms:', container, 'HTML length:', html.length);
             container.innerHTML = html;
         }
         
@@ -2564,7 +2606,7 @@
                 const remaining = getTimeRemaining(baro.departure);
                 html += '<div style="text-align: center; margin-bottom: 5px;">';
                 html += '<div style="font-size: 1.2rem; color: #EB6F92; font-weight: 600; margin-bottom: 0px;">Se va en:</div>';
-                html += `<div class="timer baro-timer" data-expiry="${baro.departure}" style="font-size: 0.9rem; color: #e0e6ed; font-weight: 700;">${formatTimeCoda(remaining)}</div>`;
+                html += `<div class="timer baro-timer" data-expiry="${baro.departure}" style="font-size: 0.9rem; text-align: center; color: #e0e6ed; font-weight: 700;">${formatTimeCoda(remaining)}</div>`;
                 html += '</div>';
                 
                 html += '<div style="text-align: center; font-size: 1rem; color: #8b95a5; margin-bottom: 25px;">';
@@ -2575,14 +2617,14 @@
                 if (baro.inventory && baro.inventory.length > 0) {
                     html += '<div style="margin-top: 20px;">';
                     html += '<h3 style="color: #EB6F92; font-size: 1.3rem; text-align: center; margin-bottom: 15px;">Inventario</h3>';
-                    html += '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px;">';
+                    html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, max-content)); gap: 12px; justify-content: center;">';
                     
                     baro.inventory.forEach(item => {
-                        html += '<div style="background: #151933; border: 1px solid #2a3150; border-radius: 6px; padding: 12px; transition: all 0.2s;" class="baro-item">';
-                        html += `<div style="font-size: 0.85rem; font-weight: 600; color: #e0e6ed; margin-bottom: 8px;">${item.name}</div>`;
-                        html += '<div style="display: flex; justify-content: space-between; align-items: center;">';
-                        html += `<div style="font-size: 0.75rem; color: #F4C076;">${item.ducats} Ducados</div>`;
-                        html += `<div style="font-size: 0.75rem; color: #8b95a5;">${item.credits.toLocaleString()} Créditos</div>`;
+                        html += '<div style="background: #151933; border: 1px solid #2a3150; border-radius: 6px; padding: 10px 12px; transition: all 0.2s;" class="baro-item">';
+                        html += '<div style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">';
+                        html += `<div style="font-size: 0.85rem; font-weight: 600; color: #e0e6ed; flex-shrink: 1;">${item.name}</div>`;
+                        // html += `<div style="font-size: 0.7rem; color: #8b95a5; white-space: nowrap; flex-shrink: 0;"><img src="./20px-OrokinDucats.png" style="height: 14px; vertical-align: middle; margin-right: 2px;">${item.ducats} + <img src="./20px-Credits64.png" style="height: 14px; vertical-align: middle; margin: 0 2px;">${item.credits.toLocaleString()}</div>`;
+                        html += `<div style="font-size: 0.7rem; white-space: nowrap; flex-shrink: 0;"><img src="./20px-OrokinDucats.png" style="height: 14px; vertical-align: middle; margin-right: 2px;"><span style="color: #ECBA73;">${item.ducats}</span> <span style="color: #8b95a5;">+ <img src="./20px-Credits64.png" style="height: 14px; vertical-align: middle; margin: 0 2px;">${item.credits.toLocaleString()}</span></div>`;
                         html += '</div>';
                         html += '</div>';
                     });
@@ -2646,7 +2688,7 @@
         
         // Inicializar la aplicación
         async function init() {
-            console.log('Iniciando...');
+            // console.log('Iniciando...');
             applyViewMode(); // Aplicar filtro de vista
             await loadNodeData(); // Cargar datos de nodos
             await loadExportRegions(); // Cargar datos de ExportRegions (Railjack)
